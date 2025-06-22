@@ -16,7 +16,7 @@ export const CREATE_WEBSITE_ARTICLE = 'api/v1/web-content/createArticle';
 export const CREATE_USER = 'api/auth/register';
 
 // cinnamon miracle
-export const FETCH_ALL_USERS_BY_PAGINATION = 'api/users/';
+export const FETCH_ALL_USERS_BY_PAGINATION = 'api/v1/auth/get-all-users?';
 export const CREATE_CATEGORY = 'api/categories';
 export const FETCH_CATEGORIES = 'api/categories/';
 export const DELETE_CATEGORY = 'api/categories/';

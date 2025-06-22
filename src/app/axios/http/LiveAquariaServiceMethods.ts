@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from 'axios';
 import { axiosApi } from '../axios_instances';
 
 export function getAccessToken() {
-	const tokenString = localStorage.getItem('accessToken');
+	const tokenString = localStorage.getItem('access_token');
 
 	if (tokenString) {
 		try {

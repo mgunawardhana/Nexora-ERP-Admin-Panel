@@ -1,5 +1,5 @@
-import { get } from '../../../http/LiveAquariaServiceMethods';
+import { post } from '../../../http/LiveAquariaServiceMethods';
 import * as url from '../url_helper';
 
-export const fetchAllUsersByPagination = (pageNo: string | number, pageSize: string | number) =>
-	get(`${url.FETCH_ALL_USERS_BY_PAGINATION}page/${pageNo}/size/${pageSize}`);
+export const fetchAllUsersByPagination = (page: string | number, size: string | number) =>
+	post(`${url.FETCH_ALL_USERS_BY_PAGINATION}page=${page}&size=${size}`);

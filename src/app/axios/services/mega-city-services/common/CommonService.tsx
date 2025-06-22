@@ -1,6 +1,6 @@
 import { get, post, del, put } from '../../../http/LiveAquariaServiceMethods';
 import * as url from '../url_helper';
-import {FETCH_ANALYZED_PART} from "../url_helper";
+
 
 export const fetchAllProducts = (pageNo: string | number, pageSize: string | number) =>
 	get(`${url.FETCH_ALL_PRODUCTS}${pageNo}/size/${pageSize}`);

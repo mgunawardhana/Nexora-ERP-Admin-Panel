@@ -71,11 +71,11 @@ function JwtSignInForm() {
 	};
 
 	useEffect(() => {
-		setValue('email', 'gihan@example.com', {
+		setValue('email', 'sanjani.perera@gmail.com', {
 			shouldDirty: true,
 			shouldValidate: true
 		});
-		setValue('password', 'gihan123', {
+		setValue('password', 'sanjani@789', {
 			shouldDirty: true,
 			shouldValidate: true
 		});

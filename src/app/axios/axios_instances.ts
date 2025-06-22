@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
-const tokenString = localStorage.getItem('accessToken');
-const token: string | null = tokenString ? (JSON.parse(tokenString) as string) : null;
+const tokenString = localStorage.getItem('access_token');
+const token: string | null = tokenString || null;
 
 const VITE_BASE_URL_SERVICE: string = import.meta.env.VITE_BASE_URL_SERVICE as string;
 const VITE_BASE_URL_AUTH_SERVICE: string = import.meta.env.VITE_BASE_URL_AUTH_SERVICE as string;

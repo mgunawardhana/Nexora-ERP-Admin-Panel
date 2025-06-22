@@ -256,25 +256,25 @@ function JwtAuthProvider(props: JwtAuthProviderProps) {
 		try {
 			const response: AxiosResponse<LoginDataType> = await axios.post(SIGN_IN, dataCredentials);
 			const data: LoginDataType = response?.data;
-			localStorage.setItem('accessToken', JSON.stringify(data.accessToken));
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-			const { firstName } = data.user;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-			const { lastName } = data.user;
-			localStorage.setItem('username', JSON.stringify(`${firstName} ${lastName}`));
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-			const { role } = data.user;
-			if (role) {
-				localStorage.setItem('loginUserRole', role);
-			} else {
-				localStorage.removeItem('loginUserRole');
-			}
+			localStorage.setItem('access_token', JSON.stringify(data.accessToken));
+			// // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+			// const { firstName } = data.user;
+			// // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+			// const { lastName } = data.user;
+			// localStorage.setItem('username', JSON.stringify(`${firstName} ${lastName}`));
+			// // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+			// const { role } = data.user;
+			// if (role) {
+			// 	localStorage.setItem('loginUserRole', role);
+			// } else {
+			// 	localStorage.removeItem('loginUserRole');
+			// }
 
 			const tempData: Partial<User> = {
 				uid: 'XgbuVEXBU5gtSKdbQRP1Zbbby1i1',
 				role: 'admin',
 				data: {
-					displayName: 'Cinnamon Miracle Systems',
+					displayName: 'Nexora HR Systems',
 					photoURL: 'assets/images/avatars/demo-admin.png',
 					email: 'admin@nlb.com',
 					settings: {

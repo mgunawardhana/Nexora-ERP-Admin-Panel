@@ -11,7 +11,7 @@ import { darken } from '@mui/material/styles';
 import { selectUser } from 'src/app/auth/user/store/userSlice';
 import { useAppSelector } from 'app/store/hooks';
 import { useGetProjectDashboardProjectsQuery } from './ProjectDashboardApi';
-import image from '../../../assets/Flux_Dev_A_white_minimalist_canvas_with_a_hyperrealistic_moder_4.jpg';
+import image from '../../../assets/medium-shot-employees-working-together.jpg';
 
 /**
  * The ProjectDashboardAppHeader page.
