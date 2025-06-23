@@ -34,3 +34,5 @@ export const fetchOrders = (
 export const createUser = (data: any) => post(url.CREATE_USER, data);
 export const businessSummery = () => get(`${url.FETCH_BUSINESS_DETAILS}`);
 export const fetchAnalyzingPart = () => get(`${url.FETCH_ANALYZED_PART}`);
+export const fetchRoleByOfficeLocationsForAnalytics = () => get(`${url.ROLES_BY_OFFICE_LOCATIONS_FOR_ANALYTICS}`);
+export const fetchStatusByRoleForAnalytics = () => get(`${url.STATUS_BY_ROLE_FOR_ANALYTICS}`);

@@ -32,4 +32,7 @@ export const CREATE_RECEIVED_STOCKS = 'api/received-stocks/';
 export const CREATE_PLACE_ORDER = 'api/sales';
 export const FETCH_ORDERS = 'api/sales/orders?page';
 export const FETCH_ANALYZED_PART = 'api/v1/analytics/role-count';
+export const ROLES_BY_OFFICE_LOCATIONS_FOR_ANALYTICS = 'api/v1/analytics/role-by-office-location';
+export const STATUS_BY_ROLE_FOR_ANALYTICS = 'api/v1/analytics/role-by-employment-status';
+
 

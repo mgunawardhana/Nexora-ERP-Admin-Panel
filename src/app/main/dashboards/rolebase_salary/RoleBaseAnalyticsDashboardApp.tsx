@@ -6,29 +6,27 @@ import {
 	CategoryScale,
 	LinearScale,
 	BarElement,
+	BarController,
 	Title,
 	Tooltip,
 	Legend,
 	ChartData,
-	ChartOptions,
-	BarController // Add this import
+	ChartOptions
 } from 'chart.js';
-import { fetchAnalyzingPart } from '../../../axios/services/mega-city-services/common/CommonService';
+import { fetchRoleByOfficeLocationsForAnalytics } from '../../../axios/services/mega-city-services/common/CommonService';
 
-// Update the registration to include BarController
-ChartJS.register(
-	CategoryScale,
-	LinearScale,
-	BarElement,
-	Title,
-	Tooltip,
-	Legend,
-	BarController // Add this registration
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, Title, Tooltip, Legend);
 
-// Rest of your imports and interfaces remain the same
+interface EmployeeRoleData {
+	[officeLocation: string]: { [role: string]: number };
+}
 
-function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartComponentProps) {
+interface ChartComponentProps {
+	data: EmployeeRoleData;
+	title?: string;
+}
+
+function StackedBarChart({ data, title = 'Role Distribution by Office Location' }: ChartComponentProps) {
 	const chartRef = useRef<HTMLCanvasElement | null>(null);
 	const chartInstance = useRef<ChartJS | null>(null);
 
@@ -42,33 +40,32 @@ function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartCompo
 
 			if (!ctx) return;
 
+			// Extract unique roles and office locations
+			const officeLocations = Object.keys(data);
+			const roles = [...new Set(Object.values(data).flatMap((loc) => Object.keys(loc)))];
+			const colors = [
+				'rgba(255, 99, 132, 0.6)',
+				'rgba(54, 162, 235, 0.6)',
+				'rgba(255, 206, 86, 0.6)',
+				'rgba(75, 192, 192, 0.6)',
+				'rgba(153, 102, 255, 0.6)'
+			];
+
+			// Create datasets for each role
+			const datasets = roles.map((role, index) => ({
+				label: role.replace(/_/g, ' '), // Format role names (e.g., HR_MANAGER -> HR Manager)
+				data: officeLocations.map((location) => data[location][role] || 0),
+				backgroundColor: colors[index % colors.length],
+				borderColor: colors[index % colors.length].replace('0.6', '1'),
+				borderWidth: 1
+			}));
+
 			const chartData: ChartData<'bar'> = {
-				labels: Object.keys(data).map((key) => key.replace(/_/g, ' ')), // Format labels to be more readable
-				datasets: [
-					{
-						label: 'Number of Employees',
-						data: Object.values(data),
-						backgroundColor: [
-							'rgba(75, 192, 192, 0.6)',
-							'rgba(54, 162, 235, 0.6)',
-							'rgba(255, 206, 86, 0.6)',
-							'rgba(255, 99, 132, 0.6)',
-							'rgba(153, 102, 255, 0.6)'
-						],
-						borderColor: [
-							'rgba(75, 192, 192, 1)',
-							'rgba(54, 162, 235, 1)',
-							'rgba(255, 206, 86, 1)',
-							'rgba(255, 99, 132, 1)',
-							'rgba(153, 102, 255, 1)'
-						],
-						borderWidth: 1
-					}
-				]
+				labels: officeLocations.map((loc) => loc.replace(/_/g, ' ')), // Format location names
+				datasets
 			};
 
 			const options: ChartOptions<'bar'> = {
-				indexAxis: 'y',
 				responsive: true,
 				maintainAspectRatio: false,
 				plugins: {
@@ -78,21 +75,24 @@ function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartCompo
 						font: { size: 16, weight: 'bold' }
 					},
 					legend: {
-						display: false
+						display: true,
+						position: 'top'
 					}
 				},
 				scales: {
 					x: {
+						stacked: true,
+						title: {
+							display: true,
+							text: 'Office Location'
+						}
+					},
+					y: {
+						stacked: true,
 						beginAtZero: true,
 						title: {
 							display: true,
 							text: 'Number of Employees'
-						}
-					},
-					y: {
-						title: {
-							display: true,
-							text: 'Role'
 						}
 					}
 				}
@@ -105,6 +105,7 @@ function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartCompo
 			});
 		}
 
+		// eslint-disable-next-line consistent-return
 		return () => {
 			if (chartInstance.current) {
 				chartInstance.current.destroy();
@@ -119,7 +120,7 @@ function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartCompo
 	);
 }
 
-function AnalyticsDashboardApp() {
+function RoleBaseAnalyticsDashboardApp() {
 	const [employeeData, setEmployeeData] = useState<EmployeeRoleData | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -127,7 +128,8 @@ function AnalyticsDashboardApp() {
 		const fetchData = async () => {
 			try {
 				setIsLoading(true);
-				const response = await fetchAnalyzingPart();
+				const response = await fetchRoleByOfficeLocationsForAnalytics();
+				console.log('API Response:', response);
 
 				if (response && typeof response === 'object') {
 					setEmployeeData(response);
@@ -167,9 +169,9 @@ function AnalyticsDashboardApp() {
 							Employee Role Distribution
 						</Typography>
 						{employeeData ? (
-							<HorizontalBarChart
+							<StackedBarChart
 								data={employeeData}
-								title="Employee Roles Overview"
+								title="Employee Roles by Office Location"
 							/>
 						) : (
 							<Box
@@ -195,4 +197,4 @@ function AnalyticsDashboardApp() {
 	);
 }
 
-export default AnalyticsDashboardApp;
+export default RoleBaseAnalyticsDashboardApp;

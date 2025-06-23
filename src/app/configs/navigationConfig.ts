@@ -48,6 +48,20 @@ const navigationConfig: FuseNavItemType[] = [
 						type: 'item',
 						icon: 'heroicons-outline:cash',
 						url: '/dashboards/analytics'
+					},
+					{
+						id: 'dashboards.rolebase_salary',
+						title: 'Branch Diversity',
+						type: 'item',
+						icon: 'heroicons-outline:currency-dollar',
+						url: '/dashboards/analytics-salary-base'
+					},
+					{
+						id: 'dashboards.rolebase',
+						title: 'Status Wise Role',
+						type: 'item',
+						icon: 'heroicons-outline:chart-bar',
+						url: '/dashboards/analytics-status-base'
 					}
 				]
 				// url: '/dashboards/analytics'

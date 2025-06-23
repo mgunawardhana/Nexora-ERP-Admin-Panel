@@ -11,14 +11,13 @@ import { darken } from '@mui/material/styles';
 import { selectUser } from 'src/app/auth/user/store/userSlice';
 import { useAppSelector } from 'app/store/hooks';
 import { useGetProjectDashboardProjectsQuery } from './ProjectDashboardApi';
-import image from '../../../assets/medium-shot-employees-working-together.jpg';
+import image from '../../../assets/Leonardo_Phoenix_10_A_photorealistic_image_of_a_turnover_coin_1.jpg';
 
 /**
  * The ProjectDashboardAppHeader page.
  */
 function ProjectDashboardAppHeader() {
 	const { data: projects, isLoading } = useGetProjectDashboardProjectsQuery();
-
 	const user = useAppSelector(selectUser);
 
 	const [selectedProject, setSelectedProject] = useState<{ id: number; menuEl: HTMLElement | null }>({
@@ -55,16 +54,13 @@ function ProjectDashboardAppHeader() {
 		<div
 			className="flex flex-col w-full px-24 sm:px-32"
 			style={{
-				backgroundImage: `url(${image})`,
-				backgroundSize: 'cover',
+				backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url(${image})`,
 				backgroundPosition: 'center',
-				backgroundRepeat: 'no-repeat',
-				filter: 'brightness(0.9) contrast(1)', // optional matte effect
-				borderRadius:'10px'
+				backgroundSize: 'cover',
+				borderRadius: '10px'
 			}}
 		>
-
-		<div className="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-32 sm:my-48">
+			<div className="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-32 sm:my-48">
 				<div className="flex flex-auto items-center min-w-0">
 					<Avatar
 						sx={{
@@ -78,20 +74,24 @@ function ProjectDashboardAppHeader() {
 						{user?.data?.displayName?.[0]}
 					</Avatar>
 					<div className="flex flex-col min-w-0 mx-16">
-						<Typography className="text-2xl md:text-5xl font-semibold tracking-tight leading-7 md:leading-snug truncate">
-							{`Welcome back to, `}
-							<span style={{ color: '#E07B39' }}>{user.data.displayName}</span>!
+						<Typography
+							className="text-2xl md:text-5xl font-semibold tracking-tight leading-7 md:leading-snug truncate"
+							sx={{ color: '#100505' }}
+						>
+							<span style={{ color: '#ffffff' }}>Welcome back to, </span>
+							<span style={{ color: '#f59e42' }}>{user.data.displayName}!</span>
 						</Typography>
 
 						<div className="flex items-center">
 							<FuseSvgIcon
 								size={20}
-								color="action"
+								sx={{ color: '#ffffff' }}
 							>
 								heroicons-solid:bell
 							</FuseSvgIcon>
 							<Typography
 								className="mx-6 leading-6 truncate"
+								sx={{ color: '#ffffff' }}
 							>
 								You have 2 new messages and 15 new tasks
 							</Typography>

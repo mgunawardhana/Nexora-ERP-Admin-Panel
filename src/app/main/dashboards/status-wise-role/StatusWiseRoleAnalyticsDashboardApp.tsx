@@ -6,69 +6,66 @@ import {
 	CategoryScale,
 	LinearScale,
 	BarElement,
+	BarController,
 	Title,
 	Tooltip,
 	Legend,
 	ChartData,
-	ChartOptions,
-	BarController // Add this import
+	ChartOptions
 } from 'chart.js';
-import { fetchAnalyzingPart } from '../../../axios/services/mega-city-services/common/CommonService';
+import { fetchStatusByRoleForAnalytics } from '../../../axios/services/mega-city-services/common/CommonService';
 
-// Update the registration to include BarController
-ChartJS.register(
-	CategoryScale,
-	LinearScale,
-	BarElement,
-	Title,
-	Tooltip,
-	Legend,
-	BarController // Add this registration
-);
+ChartJS.register(CategoryScale, LinearScale, BarController, BarElement, Title, Tooltip, Legend);
 
-// Rest of your imports and interfaces remain the same
+interface EmployeeRoleData {
+	[employmentStatus: string]: { [role: string]: number };
+}
 
-function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartComponentProps) {
+interface ChartComponentProps {
+	data: EmployeeRoleData;
+	title?: string;
+}
+
+function GroupedBarChart({ data, title = 'Role Distribution by Employment Status' }: ChartComponentProps) {
 	const chartRef = useRef<HTMLCanvasElement | null>(null);
-	const chartInstance = useRef<ChartJS | null>(null);
+	const chartInstanceRef = useRef<ChartJS | null>(null);
 
 	useEffect(() => {
 		if (chartRef.current && data) {
-			if (chartInstance.current) {
-				chartInstance.current.destroy();
+			if (chartInstanceRef.current) {
+				chartInstanceRef.current.destroy();
 			}
 
 			const ctx = chartRef.current.getContext('2d');
 
 			if (!ctx) return;
 
+			// Extract unique roles and employment statuses
+			const employmentStatuses = Object.keys(data);
+			const roles = [...new Set(Object.values(data).flatMap((status) => Object.keys(status)))];
+			const colors = [
+				'rgba(255, 99, 132, 0.6)',
+				'rgba(54, 162, 235, 0.6)',
+				'rgba(255, 206, 86, 0.6)',
+				'rgba(75, 192, 192, 0.6)',
+				'rgba(153, 102, 255, 0.6)'
+			];
+
+			// Create datasets for each role
+			const datasets = roles.map((role, index) => ({
+				label: role.replace(/_/g, ' '), // Format role names (e.g., HR_MANAGER -> HR Manager)
+				data: employmentStatuses.map((status) => data[status][role] || 0),
+				backgroundColor: colors[index % colors.length],
+				borderColor: colors[index % colors.length].replace('0.6', '1'),
+				borderWidth: 1
+			}));
+
 			const chartData: ChartData<'bar'> = {
-				labels: Object.keys(data).map((key) => key.replace(/_/g, ' ')), // Format labels to be more readable
-				datasets: [
-					{
-						label: 'Number of Employees',
-						data: Object.values(data),
-						backgroundColor: [
-							'rgba(75, 192, 192, 0.6)',
-							'rgba(54, 162, 235, 0.6)',
-							'rgba(255, 206, 86, 0.6)',
-							'rgba(255, 99, 132, 0.6)',
-							'rgba(153, 102, 255, 0.6)'
-						],
-						borderColor: [
-							'rgba(75, 192, 192, 1)',
-							'rgba(54, 162, 235, 1)',
-							'rgba(255, 206, 86, 1)',
-							'rgba(255, 99, 132, 1)',
-							'rgba(153, 102, 255, 1)'
-						],
-						borderWidth: 1
-					}
-				]
+				labels: employmentStatuses.map((status) => status.replace(/_/g, ' ')), // Format status names
+				datasets
 			};
 
 			const options: ChartOptions<'bar'> = {
-				indexAxis: 'y',
 				responsive: true,
 				maintainAspectRatio: false,
 				plugins: {
@@ -78,27 +75,28 @@ function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartCompo
 						font: { size: 16, weight: 'bold' }
 					},
 					legend: {
-						display: false
+						display: true,
+						position: 'top'
 					}
 				},
 				scales: {
 					x: {
+						title: {
+							display: true,
+							text: 'Employment Status'
+						}
+					},
+					y: {
 						beginAtZero: true,
 						title: {
 							display: true,
 							text: 'Number of Employees'
 						}
-					},
-					y: {
-						title: {
-							display: true,
-							text: 'Role'
-						}
 					}
 				}
 			};
 
-			chartInstance.current = new ChartJS(ctx, {
+			chartInstanceRef.current = new ChartJS(ctx, {
 				type: 'bar',
 				data: chartData,
 				options
@@ -106,8 +104,8 @@ function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartCompo
 		}
 
 		return () => {
-			if (chartInstance.current) {
-				chartInstance.current.destroy();
+			if (chartInstanceRef.current) {
+				chartInstanceRef.current.destroy();
 			}
 		};
 	}, [data, title]);
@@ -119,7 +117,7 @@ function HorizontalBarChart({ data, title = 'Horizontal Bar Chart' }: ChartCompo
 	);
 }
 
-function AnalyticsDashboardApp() {
+function StatusWiseRoleAnalyticsDashboardApp() {
 	const [employeeData, setEmployeeData] = useState<EmployeeRoleData | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -127,7 +125,8 @@ function AnalyticsDashboardApp() {
 		const fetchData = async () => {
 			try {
 				setIsLoading(true);
-				const response = await fetchAnalyzingPart();
+				const response = await fetchStatusByRoleForAnalytics();
+				console.log('API Response:', response);
 
 				if (response && typeof response === 'object') {
 					setEmployeeData(response);
@@ -164,12 +163,12 @@ function AnalyticsDashboardApp() {
 							variant="h6"
 							gutterBottom
 						>
-							Employee Role Distribution
+							Employee Role Distribution by Employment Status
 						</Typography>
 						{employeeData ? (
-							<HorizontalBarChart
+							<GroupedBarChart
 								data={employeeData}
-								title="Employee Roles Overview"
+								title="Employee Roles by Employment Status"
 							/>
 						) : (
 							<Box
@@ -195,4 +194,4 @@ function AnalyticsDashboardApp() {
 	);
 }
 
-export default AnalyticsDashboardApp;
+export default StatusWiseRoleAnalyticsDashboardApp;
