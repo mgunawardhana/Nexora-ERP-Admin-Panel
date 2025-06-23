@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from 'axios';
 import { axiosApi } from '../axios_instances';
 
 export function getAccessToken() {
-	const tokenString = localStorage.getItem('access_token');
+	const tokenString = localStorage.getItem('jwt_access_token');
 
 	if (tokenString) {
 		try {
@@ -14,7 +14,7 @@ export function getAccessToken() {
 		}
 	}
 
-	return null;
+	return tokenString;
 }
 
 export async function get<T>(url: string, config: AxiosRequestConfig = {}): Promise<T> {

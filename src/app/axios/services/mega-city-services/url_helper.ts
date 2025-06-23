@@ -31,5 +31,5 @@ export const DELETE_RECEIVED_STOCKS = 'api/received-stocks/';
 export const CREATE_RECEIVED_STOCKS = 'api/received-stocks/';
 export const CREATE_PLACE_ORDER = 'api/sales';
 export const FETCH_ORDERS = 'api/sales/orders?page';
-export const FETCH_ANALYZED_PART = 'api/sales/chart-data';
+export const FETCH_ANALYZED_PART = 'api/v1/analytics/role-count';
 

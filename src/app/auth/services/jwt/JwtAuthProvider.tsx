@@ -256,7 +256,7 @@ function JwtAuthProvider(props: JwtAuthProviderProps) {
 		try {
 			const response: AxiosResponse<LoginDataType> = await axios.post(SIGN_IN, dataCredentials);
 			const data: LoginDataType = response?.data;
-			localStorage.setItem('access_token', JSON.stringify(data.accessToken));
+			localStorage.setItem('access_token', data.accessToken);
 			// // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
 			// const { firstName } = data.user;
 			// // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
