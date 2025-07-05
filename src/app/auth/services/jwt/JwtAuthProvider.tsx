@@ -275,7 +275,7 @@ function JwtAuthProvider(props: JwtAuthProviderProps) {
 				role: 'admin',
 				data: {
 					displayName: 'Nexora HR Systems',
-					photoURL: 'assets/images/avatars/demo-admin.png',
+					photoURL: '',
 					email: 'admin@nlb.com',
 					settings: {
 						layout: {},

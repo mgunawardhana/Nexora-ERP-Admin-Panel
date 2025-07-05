@@ -37,7 +37,7 @@ function OverdueWidget({ value = 0 }: OverdueWidgetProps) {
 					className="px-16 text-lg font-medium tracking-tight leading-6 truncate"
 					color="text.secondary"
 				>
-					Total Boatman Amount
+					{/*Total Boatman Amount*/}
 				</Typography>
 				<IconButton aria-label="more" size="large">
 					<FuseSvgIcon>heroicons-outline:dots-vertical</FuseSvgIcon>

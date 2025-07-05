@@ -145,13 +145,13 @@ function BookingType() {
 
 	// Fetch on mount
 	useEffect(() => {
-		fetchOrdersData();
+		// fetchOrdersData();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// Fetch on pageNo or pageSize change
 	useEffect(() => {
-		fetchOrdersData(currentFilters);
+		// fetchOrdersData(currentFilters);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pageNo, pageSize]);
 
