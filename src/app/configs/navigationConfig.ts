@@ -153,14 +153,21 @@ const navigationConfig: FuseNavItemType[] = [
 			// 		// },
 			{
 				id: 'salesManagement.orders',
-				title: 'Orders',
+				title: 'AI Recommendation',
 				type: 'item',
-				icon: 'heroicons-outline:inbox',
+				icon: 'heroicons-outline:light-bulb',
 				url: '/web/orders'
 			},
 			{
+				id: 'salesManagement.orderDetails1',
+				title: 'Report',
+				type: 'item',
+				icon: 'heroicons-outline:document-report',
+				url: 'web/orders-details'
+			},
+			{
 				id: 'salesManagement.orderDetails',
-				title: 'Order Details',
+				title: 'Attendance Details',
 				type: 'item',
 				icon: 'heroicons-outline:document-report',
 				url: 'web/orders-details'

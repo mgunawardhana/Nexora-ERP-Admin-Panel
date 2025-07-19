@@ -48,13 +48,13 @@ function HomeTab() {
 
 	const fetchSummery = async () => {
 		try {
-			const response = (await businessSummery()) as ApiResponse;
-			if (response.success) {
-				setValue(response.data);
-				console.log('groupCodeCount', response.data.groupCodeCount); // Log after setting state
-			} else {
-				toast.error(response.message || 'Failed to fetch summary');
-			}
+			// const response = (await businessSummery()) as ApiResponse;
+			// if (response.success) {
+			// 	setValue(response.data);
+			// 	console.log('groupCodeCount', response.data.groupCodeCount); // Log after setting state
+			// } else {
+			// 	toast.error(response.message || 'Failed to fetch summary');
+			// }
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'An error occurred';
 			toast.error(errorMessage);

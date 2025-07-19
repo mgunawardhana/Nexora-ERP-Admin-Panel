@@ -8,16 +8,34 @@ import {
 	Typography,
 	CircularProgress,
 	Checkbox,
-	FormControlLabel
+	FormControlLabel,
+	TextField,
+	Switch
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import SearchIcon from '@mui/icons-material/Search';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
-import TextFormField from '../../../../common/FormComponents/FormTextField';
+import { geminiAPICall } from '../../../../axios/services/mega-city-services/common/CommonService';
+
+// --- MOCK EXTERNAL DEPENDENCIES ---
+
+const useTranslation = () => ({
+	t: (key: string) => key
+});
+
+function TextFormField({ field, form, ...props }: any) {
+	return (
+		<TextField
+			{...field}
+			{...props}
+			error={form.touched[field.name] && Boolean(form.errors[field.name])}
+			helperText={form.touched[field.name] && form.errors[field.name]}
+		/>
+	);
+}
 
 // --- STYLED COMPONENTS ---
 
@@ -50,7 +68,6 @@ const SuggestionsCanvas = styled(Box)(({ theme }) => ({
 	position: 'relative'
 }));
 
-// --- UPDATED --- Animation for when the AI is talking
 const TalkingIndicator = styled(Box)(({ theme }) => ({
 	position: 'absolute',
 	top: theme.spacing(2),
@@ -64,7 +81,7 @@ const TalkingIndicator = styled(Box)(({ theme }) => ({
 	'& .voice-bar': {
 		width: '6px',
 		height: '20px',
-		margin: '0 1px', //  Bars are now even closer
+		margin: '0 1px',
 		borderRadius: '4px',
 		background: `linear-gradient(180deg, ${theme.palette.secondary.light} 0%, ${theme.palette.secondary.main} 100%)`,
 		display: 'inline-block',
@@ -74,7 +91,6 @@ const TalkingIndicator = styled(Box)(({ theme }) => ({
 		'0%, 40%, 100%': { transform: 'scaleY(0.2)' },
 		'20%': { transform: 'scaleY(1.0)' }
 	},
-	// Animation delays for 5 bars
 	'& .voice-bar:nth-of-type(1)': { animationDelay: '-1.2s' },
 	'& .voice-bar:nth-of-type(2)': { animationDelay: '-1.0s' },
 	'& .voice-bar:nth-of-type(3)': { animationDelay: '-0.8s' },
@@ -100,26 +116,72 @@ const AIAnimation = styled(Box)(({ theme }) => ({
 			transform: 'scale(0.95)',
 			boxShadow: `
 0 0 0 0 rgba(0, 123, 255, 0.7),
-	0 0 5px rgba(0, 123, 255, 0.5),
-	0 0 10px rgba(0, 123, 255, 0.3),
-	0 0 20px rgba(0, 123, 255, 0.2)`
+    0 0 5px rgba(0, 123, 255, 0.5),
+    0 0 10px rgba(0, 123, 255, 0.3),
+    0 0 20px rgba(0, 123, 255, 0.2)`
 		},
 		'70%': {
 			transform: 'scale(1)',
 			boxShadow: `
 0 0 0 10px rgba(0, 123, 255, 0),
-	0 0 15px rgba(0, 123, 255, 0.7),
-	0 0 25px rgba(0, 123, 255, 0.5),
-	0 0 40px rgba(0, 123, 255, 0.3)`
+    0 0 15px rgba(0, 123, 255, 0.7),
+    0 0 25px rgba(0, 123, 255, 0.5),
+    0 0 40px rgba(0, 123, 255, 0.3)`
 		},
 		'100%': {
 			transform: 'scale(0.95)',
 			boxShadow: `
 0 0 0 0 rgba(0, 123, 255, 0),
-	0 0 5px rgba(0, 123, 255, 0.5),
-	0 0 10px rgba(0, 123, 255, 0.3),
-	0 0 20px rgba(0, 123, 255, 0.2)`
+    0 0 5px rgba(0, 123, 255, 0.5),
+    0 0 10px rgba(0, 123, 255, 0.3),
+    0 0 20px rgba(0, 123, 255, 0.2)`
 		}
+	}
+}));
+
+const AppleSwitch = styled(Switch)(({ theme }) => ({
+	width: 42,
+	height: 26,
+	padding: 0,
+	'& .MuiSwitch-switchBase': {
+		padding: 0,
+		margin: 2,
+		transitionDuration: '300ms',
+		'&.Mui-checked': {
+			transform: 'translateX(16px)',
+			color: '#fff',
+			'& + .MuiSwitch-track': {
+				backgroundColor: theme.palette.mode === 'dark' ? '#2ECA45' : '#65C466',
+				opacity: 1,
+				border: 0
+			},
+			'&.Mui-disabled + .MuiSwitch-track': {
+				opacity: 0.5
+			}
+		},
+		'&.Mui-focusVisible .MuiSwitch-thumb': {
+			color: '#33cf4d',
+			border: '6px solid #fff'
+		},
+		'&.Mui-disabled .MuiSwitch-thumb': {
+			color: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[600]
+		},
+		'&.Mui-disabled + .MuiSwitch-track': {
+			opacity: theme.palette.mode === 'light' ? 0.7 : 0.3
+		}
+	},
+	'& .MuiSwitch-thumb': {
+		boxSizing: 'border-box',
+		width: 22,
+		height: 22
+	},
+	'& .MuiSwitch-track': {
+		borderRadius: 26 / 2,
+		backgroundColor: theme.palette.mode === 'light' ? '#E9E9EA' : '#39393D',
+		opacity: 1,
+		transition: theme.transitions.create(['background-color'], {
+			duration: 500
+		})
 	}
 }));
 
@@ -144,15 +206,16 @@ function BookingType() {
 	const { t } = useTranslation();
 	const [isSearching, setIsSearching] = useState<boolean>(false);
 	const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+	const [animatedSuggestions, setAnimatedSuggestions] = useState<Suggestion[]>([]);
 	const [hasSearched, setHasSearched] = useState<boolean>(false);
 	const [isAccepting, setIsAccepting] = useState<boolean>(false);
 	const [speechVoices, setSpeechVoices] = useState<SpeechSynthesisVoice[]>([]);
 	const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+	const [isSpeechEnabled, setIsSpeechEnabled] = useState<boolean>(false);
 
 	useEffect(() => {
 		const loadVoices = () => {
-			const availableVoices = window.speechSynthesis.getVoices();
-
+			const availableVoices: SpeechSynthesisVoice[] = window.speechSynthesis.getVoices();
 			if (availableVoices.length > 0) {
 				setSpeechVoices(availableVoices);
 			}
@@ -161,60 +224,79 @@ function BookingType() {
 		loadVoices();
 	}, []);
 
-	const speak = (text: string, onEndCallback?: () => void) => {
-		const utterance = new SpeechSynthesisUtterance(text);
-		const getNaturalVoice = (): SpeechSynthesisVoice | null => {
-			const preferredVoices = [
-				'Google UK English Female',
-				'Google US English',
-				'Microsoft Zira Desktop - English (United States)',
-				'Samantha',
-				'Susan',
-				'Female'
-			];
-			for (const name of preferredVoices) {
-				const voice = speechVoices.find((v) => v.name === name);
-
-				if (voice) return voice;
+	const speak = useCallback(
+		(text: string, onEndCallback?: () => void) => {
+			const utterance = new SpeechSynthesisUtterance(text);
+			const getNaturalVoice = (): SpeechSynthesisVoice | null => {
+				const preferredVoices = [
+					'Google UK English Female',
+					'Google US English',
+					'Microsoft Zira Desktop - English (United States)',
+					'Samantha',
+					'Susan',
+					'Female'
+				];
+				for (const name of preferredVoices) {
+					const voice = speechVoices.find((v: SpeechSynthesisVoice) => v.name === name);
+					if (voice) return voice;
+				}
+				const femaleVoice = speechVoices.find(
+					(v: SpeechSynthesisVoice) => v.lang.startsWith('en-') && v.name.toLowerCase().includes('female')
+				);
+				return femaleVoice || null;
+			};
+			const naturalVoice = getNaturalVoice();
+			if (naturalVoice) {
+				utterance.voice = naturalVoice;
 			}
-			const femaleVoice = speechVoices.find(
-				(v) => v.lang.startsWith('en-') && v.name.toLowerCase().includes('female')
-			);
-			return femaleVoice || null;
-		};
+			utterance.pitch = 1;
+			utterance.rate = 0.9;
+			utterance.onend = onEndCallback;
+			window.speechSynthesis.speak(utterance);
+		},
+		[speechVoices]
+	);
 
-		const naturalVoice = getNaturalVoice();
-
-		if (naturalVoice) {
-			utterance.voice = naturalVoice;
-		}
-
-		utterance.pitch = 1;
-		utterance.rate = 0.9;
-		utterance.onend = onEndCallback;
-		window.speechSynthesis.speak(utterance);
-	};
-
-	const speakQueue = (texts: string[]) => {
-		if (window.speechSynthesis.speaking) {
-			window.speechSynthesis.cancel();
-		}
-
-		let currentIndex = 0;
-		setIsSpeaking(true);
-
-		function speakNext() {
-			if (currentIndex < texts.length) {
-				const text = texts[currentIndex];
-				currentIndex++;
-				speak(text, speakNext);
-			} else {
-				setIsSpeaking(false);
+	const speakQueue = useCallback(
+		(texts: string[]) => {
+			if (window.speechSynthesis.speaking) {
+				window.speechSynthesis.cancel();
 			}
-		}
+			let currentIndex = 0;
+			setIsSpeaking(true);
+			function speakNext() {
+				if (currentIndex < texts.length) {
+					const text = texts[currentIndex];
+					currentIndex++;
+					speak(text, speakNext);
+				} else {
+					setIsSpeaking(false);
+				}
+			}
+			speakNext();
+		},
+		[speak]
+	);
 
-		speakNext();
-	};
+	const startWritingAnimation = useCallback(
+		(allSuggestions: Suggestion[]) => {
+			setAnimatedSuggestions([]);
+			let index = 0;
+			const interval = setInterval(() => {
+				if (index < allSuggestions.length) {
+					setAnimatedSuggestions((prev: Suggestion[]) => [...prev, allSuggestions[index]]);
+					index++;
+				} else {
+					clearInterval(interval);
+					if (isSpeechEnabled) {
+						const audioQueue = ['Here are the suggestions:', ...allSuggestions.map((s: Suggestion) => s.text)];
+						speakQueue(audioQueue);
+					}
+				}
+			}, 300);
+		},
+		[speakQueue, isSpeechEnabled]
+	);
 
 	const validationSchema = yup.object().shape({
 		firstName: yup.string(),
@@ -227,73 +309,128 @@ function BookingType() {
 		async (values: SearchFormValues) => {
 			setIsSearching(true);
 			setSuggestions([]);
+			setAnimatedSuggestions([]);
 			setHasSearched(true);
-			console.log('Searching with values:', values);
-			await new Promise((resolve) => setTimeout(resolve, 2500));
-			const mockSuggestions: Suggestion[] = [
-				{ id: 1, text: `This employee is recommended for a salary increment.`, approved: false },
-				{ id: 2, text: `This employee is recommended for the Best Employee Award.`, approved: false },
-				{ id: 3, text: 'Schedule a follow-up meeting next week.', approved: false }
-			];
-			setSuggestions(mockSuggestions);
-			setIsSearching(false);
-			toast.success(t('Suggestions generated!'));
 
-			const audioQueue = ['what suggestions do you need to accept?', ...mockSuggestions.map((s) => s.text)];
-			speakQueue(audioQueue);
+			try {
+				const { firstName, lastName, department, employeeCode } = values;
+				const promptText = `
+                Generate exactly three brief, single-line performance evaluation suggestions for an employee with the following details:
+                - Name: ${firstName || 'the employee'} ${lastName || ''}
+                - Employee Code: ${employeeCode || 'N/A'}
+                - Department: ${department || 'N/A'}
+                - Key Performance Indicator (KPI): 0.95
+
+                Format the output as three distinct, numbered points. Each suggestion should be a concise, actionable feedback point.
+                Do not include any introductory or concluding text, only the three numbered suggestions.
+            `;
+
+				const script = {
+					prompt: promptText,
+					options: { temperature: 0.7, maxOutputTokens: 250 }
+				};
+				const response = await geminiAPICall(script);
+
+				if (response.success && response.content) {
+					const rawContent: string = response.content;
+					const parsedSuggestions: Suggestion[] = rawContent
+						.split('\n')
+						.map((line) => line.replace(/^\d+\.\s*/, '').trim()) // Remove numbering and trim
+						.filter((line) => line.length > 10) // Filter out empty or short lines
+						.map((text, index) => ({
+							id: index + 1,
+							text: text,
+							approved: false
+						}));
+
+					setSuggestions(parsedSuggestions);
+					toast.success(t('Suggestions generated!'));
+					startWritingAnimation(parsedSuggestions);
+
+				} else {
+					toast.error(t('Failed to get suggestions from AI.'));
+				}
+			} catch (error) {
+				console.error('Error during AI API call:', error);
+				toast.error(t('An error occurred while fetching suggestions.'));
+			} finally {
+				setIsSearching(false);
+			}
 		},
-		[t, speechVoices]
+		[t, startWritingAnimation, isSpeechEnabled, speakQueue]
 	);
 
-	const handleReset = (resetForm: () => void) => {
-		resetForm();
-		setIsSearching(false);
-		setSuggestions([]);
-		setHasSearched(false);
+	const handleReset = useCallback(
+		(resetForm: () => void) => {
+			resetForm();
+			setIsSearching(false);
+			setSuggestions([]);
+			setAnimatedSuggestions([]);
+			setHasSearched(false);
+			if (window.speechSynthesis.speaking) {
+				window.speechSynthesis.cancel();
+				setIsSpeaking(false);
+			}
+			toast.info(t('Search form has been reset'));
+		},
+		[t]
+	);
 
-		if (window.speechSynthesis.speaking) {
-			window.speechSynthesis.cancel();
-			setIsSpeaking(false);
-		}
+	const handleSuggestionToggle = useCallback(
+		(id: number) => {
+			setSuggestions(
+				suggestions.map((suggestion: Suggestion) =>
+					suggestion.id === id ? { ...suggestion, approved: !suggestion.approved } : suggestion
+				)
+			);
+			setAnimatedSuggestions(
+				animatedSuggestions.map((suggestion: Suggestion) =>
+					suggestion.id === id ? { ...suggestion, approved: !suggestion.approved } : suggestion
+				)
+			);
+		},
+		[suggestions, animatedSuggestions]
+	);
 
-		toast.info(t('Search form has been reset'));
-	};
-
-	const handleSuggestionToggle = (id: number) => {
-		setSuggestions(
-			suggestions.map((suggestion) =>
-				suggestion.id === id ? { ...suggestion, approved: !suggestion.approved } : suggestion
-			)
-		);
-	};
-
-	const handleAcceptSuggestions = () => {
-		if (isAccepting || window.speechSynthesis.speaking) {
+	const handleAcceptSuggestions = useCallback(() => {
+		if (isAccepting || isSpeaking) {
 			return;
 		}
-
-		const approvedSuggestions = suggestions.filter((s) => s.approved);
-
+		const approvedSuggestions: Suggestion[] = suggestions.filter((s: Suggestion) => s.approved);
 		if (approvedSuggestions.length === 0) {
 			toast.warn('Please select at least one suggestion to accept.');
-			speakQueue(['Please select at least one suggestion to accept.']);
+			if (isSpeechEnabled) {
+				speakQueue(['Please select at least one suggestion to accept.']);
+			}
 			return;
 		}
-
 		console.log('--- Accepted AI Suggestions ---');
-		approvedSuggestions.forEach((suggestion) => {
-			console.log({
-				id: suggestion.id,
-				suggestion: suggestion.text,
-				approved: suggestion.approved
-			});
+		approvedSuggestions.forEach((suggestion: Suggestion) => {
+			console.log({ id: suggestion.id, suggestion: suggestion.text, approved: suggestion.approved });
 		});
-
 		setIsAccepting(true);
-		speakQueue(['thank you your response will be recorded successfully']);
+		if (isSpeechEnabled) {
+			speakQueue(['Thank you, your response will be recorded successfully.']);
+		}
 		toast.success('Suggestions have been processed. Check the console for details.');
-		// Reset isAccepting state after a delay to allow the toast to be seen
 		setTimeout(() => setIsAccepting(false), 2000);
+	}, [isAccepting, suggestions, speakQueue, isSpeechEnabled, isSpeaking]);
+
+	const handleSpeechToggle = () => {
+		const newSpeechState = !isSpeechEnabled;
+		setIsSpeechEnabled(newSpeechState);
+
+		if (newSpeechState) {
+			if (suggestions.length > 0 && !isSpeaking) {
+				const audioQueue = ['Here are the suggestions:', ...suggestions.map((s: Suggestion) => s.text)];
+				speakQueue(audioQueue);
+			}
+		} else {
+			if (window.speechSynthesis.speaking) {
+				window.speechSynthesis.cancel();
+				setIsSpeaking(false);
+			}
+		}
 	};
 
 	return (
@@ -384,16 +521,7 @@ function BookingType() {
 									className="min-w-[115px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-white font-500 py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
 									variant="contained"
 									disabled={isSearching}
-									startIcon={
-										isSearching ? (
-											<CircularProgress
-												size={20}
-												color="inherit"
-											/>
-										) : (
-											<SearchIcon />
-										)
-									}
+									startIcon={isSearching ? <CircularProgress size={20} color="inherit" /> : <SearchIcon />}
 								>
 									{isSearching ? t('Searching...') : t('Search')}
 								</Button>
@@ -418,6 +546,16 @@ function BookingType() {
 								>
 									{isAccepting ? t('Processing...') : t('Accept AI Suggestions')}
 								</Button>
+								<FormControlLabel
+									control={
+										<AppleSwitch
+											checked={isSpeechEnabled}
+											onChange={handleSpeechToggle}
+										/>
+									}
+									label={t('AI Voice')}
+									sx={{ ml: 1 }}
+								/>
 							</Box>
 						</Form>
 					)}
@@ -451,7 +589,7 @@ function BookingType() {
 							{t('AI is thinking...')}
 						</Typography>
 					</AIAnimation>
-				) : suggestions.length > 0 ? (
+				) : animatedSuggestions.length > 0 ? (
 					<Box
 						textAlign="left"
 						width="100%"
@@ -462,7 +600,7 @@ function BookingType() {
 						>
 							{t('Suggestions')}
 						</Typography>
-						{suggestions.map((s) => (
+						{animatedSuggestions.map((s) => (
 							<FormControlLabel
 								key={s.id}
 								control={
@@ -473,7 +611,7 @@ function BookingType() {
 									/>
 								}
 								label={s.text}
-								sx={{ display: 'flex', width: '100%', mb: 1 }}
+								sx={{ display: 'flex', width: '100%', mb: 1, mr: 0 }}
 							/>
 						))}
 					</Box>
