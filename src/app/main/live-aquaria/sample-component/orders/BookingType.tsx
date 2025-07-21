@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
 	Box,
 	Button,
@@ -7,15 +7,13 @@ import {
 	styled,
 	Typography,
 	CircularProgress,
-	Checkbox,
-	FormControlLabel,
 	TextField,
-	Switch
+	Switch,
+	FormControlLabel
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import SearchIcon from '@mui/icons-material/Search';
 import LockResetIcon from '@mui/icons-material/LockReset';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
 import { geminiAPICall } from '../../../../axios/services/mega-city-services/common/CommonService';
@@ -59,7 +57,7 @@ const SuggestionsCanvas = styled(Box)(({ theme }) => ({
 	backgroundColor: '#f0f2f5',
 	borderRadius: '8px',
 	border: `1px dashed ${theme.palette.divider}`,
-	minHeight: '300px',
+	minHeight: '200px',
 	display: 'flex',
 	justifyContent: 'center',
 	alignItems: 'center',
@@ -115,26 +113,26 @@ const AIAnimation = styled(Box)(({ theme }) => ({
 		'0%': {
 			transform: 'scale(0.95)',
 			boxShadow: `
-0 0 0 0 rgba(0, 123, 255, 0.7),
-    0 0 5px rgba(0, 123, 255, 0.5),
-    0 0 10px rgba(0, 123, 255, 0.3),
-    0 0 20px rgba(0, 123, 255, 0.2)`
+        0 0 0 0 rgba(0, 123, 255, 0.7),
+        0 0 5px rgba(0, 123, 255, 0.5),
+        0 0 10px rgba(0, 123, 255, 0.3),
+        0 0 20px rgba(0, 123, 255, 0.2)`
 		},
 		'70%': {
 			transform: 'scale(1)',
 			boxShadow: `
-0 0 0 10px rgba(0, 123, 255, 0),
-    0 0 15px rgba(0, 123, 255, 0.7),
-    0 0 25px rgba(0, 123, 255, 0.5),
-    0 0 40px rgba(0, 123, 255, 0.3)`
+        0 0 0 10px rgba(0, 123, 255, 0),
+        0 0 15px rgba(0, 123, 255, 0.7),
+        0 0 25px rgba(0, 123, 255, 0.5),
+        0 0 40px rgba(0, 123, 255, 0.3)`
 		},
 		'100%': {
 			transform: 'scale(0.95)',
 			boxShadow: `
-0 0 0 0 rgba(0, 123, 255, 0),
-    0 0 5px rgba(0, 123, 255, 0.5),
-    0 0 10px rgba(0, 123, 255, 0.3),
-    0 0 20px rgba(0, 123, 255, 0.2)`
+        0 0 0 0 rgba(0, 123, 255, 0),
+        0 0 5px rgba(0, 123, 255, 0.5),
+        0 0 10px rgba(0, 123, 255, 0.3),
+        0 0 20px rgba(0, 123, 255, 0.2)`
 		}
 	}
 }));
@@ -194,28 +192,26 @@ interface SearchFormValues {
 	employeeCode: string;
 }
 
-interface Suggestion {
-	id: number;
-	text: string;
-	approved: boolean;
-}
-
 // --- MAIN COMPONENT ---
 
 function BookingType() {
 	const { t } = useTranslation();
 	const [isSearching, setIsSearching] = useState<boolean>(false);
-	const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-	const [animatedSuggestions, setAnimatedSuggestions] = useState<Suggestion[]>([]);
+	const [suggestion, setSuggestion] = useState<string>('');
+	const [animatedSuggestion, setAnimatedSuggestion] = useState<string>('');
 	const [hasSearched, setHasSearched] = useState<boolean>(false);
-	const [isAccepting, setIsAccepting] = useState<boolean>(false);
 	const [speechVoices, setSpeechVoices] = useState<SpeechSynthesisVoice[]>([]);
 	const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 	const [isSpeechEnabled, setIsSpeechEnabled] = useState<boolean>(false);
 
+	// Add refs to track animation state and prevent duplicates
+	const animationRef = useRef<NodeJS.Timeout | null>(null);
+	const isAnimatingRef = useRef<boolean>(false);
+
 	useEffect(() => {
 		const loadVoices = () => {
 			const availableVoices: SpeechSynthesisVoice[] = window.speechSynthesis.getVoices();
+
 			if (availableVoices.length > 0) {
 				setSpeechVoices(availableVoices);
 			}
@@ -238,6 +234,7 @@ function BookingType() {
 				];
 				for (const name of preferredVoices) {
 					const voice = speechVoices.find((v: SpeechSynthesisVoice) => v.name === name);
+
 					if (voice) return voice;
 				}
 				const femaleVoice = speechVoices.find(
@@ -246,9 +243,11 @@ function BookingType() {
 				return femaleVoice || null;
 			};
 			const naturalVoice = getNaturalVoice();
+
 			if (naturalVoice) {
 				utterance.voice = naturalVoice;
 			}
+
 			utterance.pitch = 1;
 			utterance.rate = 0.9;
 			utterance.onend = onEndCallback;
@@ -262,8 +261,10 @@ function BookingType() {
 			if (window.speechSynthesis.speaking) {
 				window.speechSynthesis.cancel();
 			}
+
 			let currentIndex = 0;
 			setIsSpeaking(true);
+
 			function speakNext() {
 				if (currentIndex < texts.length) {
 					const text = texts[currentIndex];
@@ -273,30 +274,63 @@ function BookingType() {
 					setIsSpeaking(false);
 				}
 			}
+
 			speakNext();
 		},
 		[speak]
 	);
 
+	// Fixed animation function that prevents duplicates
 	const startWritingAnimation = useCallback(
-		(allSuggestions: Suggestion[]) => {
-			setAnimatedSuggestions([]);
+		(fullParagraph: string) => {
+			// Clear any existing animation
+			if (animationRef.current) {
+				clearInterval(animationRef.current);
+			}
+
+			// Prevent multiple animations from running
+			if (isAnimatingRef.current) {
+				return;
+			}
+
+			isAnimatingRef.current = true;
+			setAnimatedSuggestion(''); // Reset to empty string
+
+			const words = fullParagraph.split(' ').filter((word) => word.trim() !== ''); // Filter out empty words
+			let currentText = '';
 			let index = 0;
-			const interval = setInterval(() => {
-				if (index < allSuggestions.length) {
-					setAnimatedSuggestions((prev: Suggestion[]) => [...prev, allSuggestions[index]]);
+
+			animationRef.current = setInterval(() => {
+				if (index < words.length) {
+					// Build the text progressively instead of using previous state
+					currentText += (index > 0 ? ' ' : '') + words[index];
+					setAnimatedSuggestion(currentText);
 					index++;
 				} else {
-					clearInterval(interval);
+					clearInterval(animationRef.current);
+					animationRef.current = null;
+					isAnimatingRef.current = false;
+
 					if (isSpeechEnabled) {
-						const audioQueue = ['Here are the suggestions:', ...allSuggestions.map((s: Suggestion) => s.text)];
+						const audioQueue = ['Here is the summary:', fullParagraph];
 						speakQueue(audioQueue);
 					}
 				}
-			}, 300);
+			}, 100);
 		},
 		[speakQueue, isSpeechEnabled]
 	);
+
+	// Cleanup effect
+	useEffect(() => {
+		return () => {
+			if (animationRef.current) {
+				clearInterval(animationRef.current);
+			}
+
+			isAnimatingRef.current = false;
+		};
+	}, []);
 
 	const validationSchema = yup.object().shape({
 		firstName: yup.string(),
@@ -307,23 +341,31 @@ function BookingType() {
 
 	const handleSearch = useCallback(
 		async (values: SearchFormValues) => {
+			// Clear any existing animation before starting new search
+			if (animationRef.current) {
+				clearInterval(animationRef.current);
+				animationRef.current = null;
+			}
+
+			isAnimatingRef.current = false;
+
 			setIsSearching(true);
-			setSuggestions([]);
-			setAnimatedSuggestions([]);
+			setSuggestion('');
+			setAnimatedSuggestion('');
 			setHasSearched(true);
 
 			try {
 				const { firstName, lastName, department, employeeCode } = values;
 				const promptText = `
-                Generate exactly three brief, single-line performance evaluation suggestions for an employee with the following details:
-                - Name: ${firstName || 'the employee'} ${lastName || ''}
-                - Employee Code: ${employeeCode || 'N/A'}
-                - Department: ${department || 'N/A'}
-                - Key Performance Indicator (KPI): 0.95
-
-                Format the output as three distinct, numbered points. Each suggestion should be a concise, actionable feedback point.
-                Do not include any introductory or concluding text, only the three numbered suggestions.
-            `;
+						Generate a single performance evaluation paragraph (3–4 lines) based on the following employee details:
+						
+						- Name: ${firstName || 'The employee'} ${lastName || ''}
+						- Code: ${employeeCode || 'N/A'}
+						- Department: ${department || 'their department'}
+						- KPI Score: 0.21
+						
+						The paragraph should provide concise, non-repetitive, and actionable feedback. Avoid repeating words or phrases. If a field is missing or generic (e.g., "undefined" or empty), use natural fallback terms. Do not include greetings or headings—only the evaluation paragraph.
+						`;
 
 				const script = {
 					prompt: promptText,
@@ -332,21 +374,14 @@ function BookingType() {
 				const response = await geminiAPICall(script);
 
 				if (response.success && response.content) {
-					const rawContent: string = response.content;
-					const parsedSuggestions: Suggestion[] = rawContent
-						.split('\n')
-						.map((line) => line.replace(/^\d+\.\s*/, '').trim()) // Remove numbering and trim
-						.filter((line) => line.length > 10) // Filter out empty or short lines
-						.map((text, index) => ({
-							id: index + 1,
-							text: text,
-							approved: false
-						}));
-
-					setSuggestions(parsedSuggestions);
+					const suggestionParagraph: string = response.content.trim();
+					setSuggestion(suggestionParagraph);
 					toast.success(t('Suggestions generated!'));
-					startWritingAnimation(parsedSuggestions);
 
+					// Small delay to ensure state is updated before animation starts
+					setTimeout(() => {
+						startWritingAnimation(suggestionParagraph);
+					}, 100);
 				} else {
 					toast.error(t('Failed to get suggestions from AI.'));
 				}
@@ -357,79 +392,47 @@ function BookingType() {
 				setIsSearching(false);
 			}
 		},
-		[t, startWritingAnimation, isSpeechEnabled, speakQueue]
+		[t, startWritingAnimation]
 	);
 
 	const handleReset = useCallback(
 		(resetForm: () => void) => {
+			// Clear animation
+			if (animationRef.current) {
+				clearInterval(animationRef.current);
+				animationRef.current = null;
+			}
+
+			isAnimatingRef.current = false;
+
 			resetForm();
 			setIsSearching(false);
-			setSuggestions([]);
-			setAnimatedSuggestions([]);
+			setSuggestion('');
+			setAnimatedSuggestion('');
 			setHasSearched(false);
+
 			if (window.speechSynthesis.speaking) {
 				window.speechSynthesis.cancel();
 				setIsSpeaking(false);
 			}
+
 			toast.info(t('Search form has been reset'));
 		},
 		[t]
 	);
-
-	const handleSuggestionToggle = useCallback(
-		(id: number) => {
-			setSuggestions(
-				suggestions.map((suggestion: Suggestion) =>
-					suggestion.id === id ? { ...suggestion, approved: !suggestion.approved } : suggestion
-				)
-			);
-			setAnimatedSuggestions(
-				animatedSuggestions.map((suggestion: Suggestion) =>
-					suggestion.id === id ? { ...suggestion, approved: !suggestion.approved } : suggestion
-				)
-			);
-		},
-		[suggestions, animatedSuggestions]
-	);
-
-	const handleAcceptSuggestions = useCallback(() => {
-		if (isAccepting || isSpeaking) {
-			return;
-		}
-		const approvedSuggestions: Suggestion[] = suggestions.filter((s: Suggestion) => s.approved);
-		if (approvedSuggestions.length === 0) {
-			toast.warn('Please select at least one suggestion to accept.');
-			if (isSpeechEnabled) {
-				speakQueue(['Please select at least one suggestion to accept.']);
-			}
-			return;
-		}
-		console.log('--- Accepted AI Suggestions ---');
-		approvedSuggestions.forEach((suggestion: Suggestion) => {
-			console.log({ id: suggestion.id, suggestion: suggestion.text, approved: suggestion.approved });
-		});
-		setIsAccepting(true);
-		if (isSpeechEnabled) {
-			speakQueue(['Thank you, your response will be recorded successfully.']);
-		}
-		toast.success('Suggestions have been processed. Check the console for details.');
-		setTimeout(() => setIsAccepting(false), 2000);
-	}, [isAccepting, suggestions, speakQueue, isSpeechEnabled, isSpeaking]);
 
 	const handleSpeechToggle = () => {
 		const newSpeechState = !isSpeechEnabled;
 		setIsSpeechEnabled(newSpeechState);
 
 		if (newSpeechState) {
-			if (suggestions.length > 0 && !isSpeaking) {
-				const audioQueue = ['Here are the suggestions:', ...suggestions.map((s: Suggestion) => s.text)];
+			if (suggestion && !isSpeaking) {
+				const audioQueue = ['Here is the summary:', suggestion];
 				speakQueue(audioQueue);
 			}
-		} else {
-			if (window.speechSynthesis.speaking) {
-				window.speechSynthesis.cancel();
-				setIsSpeaking(false);
-			}
+		} else if (window.speechSynthesis.speaking) {
+			window.speechSynthesis.cancel();
+			setIsSpeaking(false);
 		}
 	};
 
@@ -521,7 +524,16 @@ function BookingType() {
 									className="min-w-[115px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-white font-500 py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
 									variant="contained"
 									disabled={isSearching}
-									startIcon={isSearching ? <CircularProgress size={20} color="inherit" /> : <SearchIcon />}
+									startIcon={
+										isSearching ? (
+											<CircularProgress
+												size={20}
+												color="inherit"
+											/>
+										) : (
+											<SearchIcon />
+										)
+									}
 								>
 									{isSearching ? t('Searching...') : t('Search')}
 								</Button>
@@ -534,17 +546,6 @@ function BookingType() {
 									disabled={isSearching}
 								>
 									{t('Reset')}
-								</Button>
-								<Button
-									type="button"
-									className="min-w-[115px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] text-white font-500 py-0 rounded-[6px] bg-blue-600 hover:bg-blue-800/80"
-									variant="contained"
-									color="primary"
-									onClick={handleAcceptSuggestions}
-									startIcon={<CheckCircleOutlineIcon />}
-									disabled={isSearching || suggestions.length === 0 || isAccepting || isSpeaking}
-								>
-									{isAccepting ? t('Processing...') : t('Accept AI Suggestions')}
 								</Button>
 								<FormControlLabel
 									control={
@@ -589,7 +590,7 @@ function BookingType() {
 							{t('AI is thinking...')}
 						</Typography>
 					</AIAnimation>
-				) : animatedSuggestions.length > 0 ? (
+				) : animatedSuggestion ? (
 					<Box
 						textAlign="left"
 						width="100%"
@@ -598,22 +599,14 @@ function BookingType() {
 							variant="h5"
 							sx={{ mb: 2, borderBottom: '1px solid #ddd', pb: 1 }}
 						>
-							{t('Suggestions')}
+							{t('Suggestion Summary')}
 						</Typography>
-						{animatedSuggestions.map((s) => (
-							<FormControlLabel
-								key={s.id}
-								control={
-									<Checkbox
-										checked={s.approved}
-										onChange={() => handleSuggestionToggle(s.id)}
-										name={s.text}
-									/>
-								}
-								label={s.text}
-								sx={{ display: 'flex', width: '100%', mb: 1, mr: 0 }}
-							/>
-						))}
+						<Typography
+							variant="body1"
+							sx={{ lineHeight: 1.6 }}
+						>
+							{animatedSuggestion}
+						</Typography>
 					</Box>
 				) : (
 					<Typography
