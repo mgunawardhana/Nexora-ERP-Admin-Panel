@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
-import { Button, CircularProgress, Dialog, DialogContent, DialogTitle, Grid, Typography, MenuItem } from '@mui/material';
+import {
+	Button,
+	CircularProgress,
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	Grid,
+	Typography,
+	MenuItem
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
-import TextFormField from '../../../../../common/FormComponents/FormTextField';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import TextFormField from '../../../../../common/FormComponents/FormTextField';
 
 interface UserType {
 	role: string;
@@ -63,12 +72,12 @@ interface Props {
 }
 
 const UserRegistrationModal: React.FC<Props> = ({
-													isOpen,
-													toggleModal,
-													clickedRowData,
-													fetchAllUsers,
-													isTableMode,
-												}) => {
+	isOpen,
+	toggleModal,
+	clickedRowData,
+	fetchAllUsers,
+	isTableMode
+}) => {
 	const { t } = useTranslation('userRegistration');
 	const [isDataLoading, setDataLoading] = useState<boolean>(false);
 
@@ -90,7 +99,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 		password: yup.string().when('isTableMode', {
 			is: 'new',
 			then: yup.string().required(t('Password is required')).min(8, t('Password must be at least 8 characters')),
-			otherwise: yup.string(),
+			otherwise: yup.string()
 		}),
 		address: yup.string().required(t('Address is required')).trim(),
 		nationalId: yup.string().required(t('National ID is required')).trim(),
@@ -128,13 +137,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 		mentorId: yup.number().required(t('Mentor ID is required')).positive().integer(),
 		officeLocation: yup.string().required(t('Office Location is required')).trim(),
 		workMode: yup.string().required(t('Work Mode is required')).oneOf(workModeOptions),
-		notes: yup.string().required(t('Notes are required')).trim(),
+		notes: yup.string().required(t('Notes are required')).trim()
 	});
 
 	const handleSubmit = async (values: UserType) => {
 		const data: UserType = {
 			...values,
-			employeeCode: values.employeeCode || generateEmployeeCode(),
+			employeeCode: values.employeeCode || generateEmployeeCode()
 		};
 
 		try {
@@ -201,7 +210,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 		mentorId: clickedRowData?.mentorId || 0,
 		officeLocation: clickedRowData?.officeLocation || '',
 		workMode: clickedRowData?.workMode || '',
-		notes: clickedRowData?.notes || '',
+		notes: clickedRowData?.notes || ''
 	};
 
 	return (
@@ -213,7 +222,11 @@ const UserRegistrationModal: React.FC<Props> = ({
 				PaperProps={{ style: { top: '40px', margin: 0, position: 'absolute' } }}
 			>
 				<DialogTitle>
-					<Typography variant="h6" color="textSecondary" fontWeight={400}>
+					<Typography
+						variant="h6"
+						color="textSecondary"
+						fontWeight={400}
+					>
 						{t('User Registration')}
 					</Typography>
 				</DialogTitle>
@@ -226,8 +239,17 @@ const UserRegistrationModal: React.FC<Props> = ({
 					>
 						{({ errors, touched, setFieldValue, values }) => (
 							<Form>
-								<Grid container spacing={2}>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+								<Grid
+									container
+									spacing={2}
+								>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Role')} <span className="text-red-500">*</span>
 										</Typography>
@@ -241,17 +263,29 @@ const UserRegistrationModal: React.FC<Props> = ({
 											error={touched.role && Boolean(errors.role)}
 											helperText={touched.role && errors.role}
 										>
-											<MenuItem value="" disabled>
+											<MenuItem
+												value=""
+												disabled
+											>
 												{t('Select Role')}
 											</MenuItem>
 											{roleOptions.map((option) => (
-												<MenuItem key={option} value={option}>
+												<MenuItem
+													key={option}
+													value={option}
+												>
 													{option}
 												</MenuItem>
 											))}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('First Name')} <span className="text-red-500">*</span>
 										</Typography>
@@ -265,7 +299,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.firstName && errors.firstName}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Last Name')} <span className="text-red-500">*</span>
 										</Typography>
@@ -279,7 +319,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.lastName && errors.lastName}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Email')} <span className="text-red-500">*</span>
 										</Typography>
@@ -293,7 +339,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.email && errors.email}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Password')} <span className="text-red-500">*</span>
 										</Typography>
@@ -308,7 +360,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.password && errors.password}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Address')} <span className="text-red-500">*</span>
 										</Typography>
@@ -322,7 +380,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.address && errors.address}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('National ID')} <span className="text-red-500">*</span>
 										</Typography>
@@ -336,7 +400,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.nationalId && errors.nationalId}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Phone Number')} <span className="text-red-500">*</span>
 										</Typography>
@@ -350,7 +420,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.phoneNumber && errors.phoneNumber}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Employee Code')} <span className="text-red-500">*</span>
 										</Typography>
@@ -364,7 +440,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.employeeCode && errors.employeeCode}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Department')} <span className="text-red-500">*</span>
 										</Typography>
@@ -378,17 +460,29 @@ const UserRegistrationModal: React.FC<Props> = ({
 											error={touched.department && Boolean(errors.department)}
 											helperText={touched.department && errors.department}
 										>
-											<MenuItem value="" disabled>
+											<MenuItem
+												value=""
+												disabled
+											>
 												{t('Select Department')}
 											</MenuItem>
 											{departmentOptions.map((option) => (
-												<MenuItem key={option} value={option}>
+												<MenuItem
+													key={option}
+													value={option}
+												>
 													{option}
 												</MenuItem>
 											))}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Designation')} <span className="text-red-500">*</span>
 										</Typography>
@@ -402,7 +496,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.designation && errors.designation}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Join Date')} <span className="text-red-500">*</span>
 										</Typography>
@@ -419,16 +519,24 @@ const UserRegistrationModal: React.FC<Props> = ({
 															fullWidth: true,
 															size: 'small',
 															error: touched.joinDate && Boolean(errors.joinDate),
-															helperText: touched.joinDate && errors.joinDate,
-														},
+															helperText: touched.joinDate && errors.joinDate
+														}
 													}}
 													value={field.value ? new Date(field.value) : null}
-													onChange={(date) => form.setFieldValue('joinDate', date ? date.toISOString() : '')}
+													onChange={(date) =>
+														form.setFieldValue('joinDate', date ? date.toISOString() : '')
+													}
 												/>
 											)}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Current Salary')} <span className="text-red-500">*</span>
 										</Typography>
@@ -443,7 +551,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.currentSalary && errors.currentSalary}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Emergency Contact Name')} <span className="text-red-500">*</span>
 										</Typography>
@@ -457,7 +571,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.emergencyContactName && errors.emergencyContactName}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Emergency Contact Phone')} <span className="text-red-500">*</span>
 										</Typography>
@@ -467,11 +587,19 @@ const UserRegistrationModal: React.FC<Props> = ({
 											component={TextFormField}
 											fullWidth
 											size="small"
-											error={touched.emergencyContactPhone && Boolean(errors.emergencyContactPhone)}
+											error={
+												touched.emergencyContactPhone && Boolean(errors.emergencyContactPhone)
+											}
 											helperText={touched.emergencyContactPhone && errors.emergencyContactPhone}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Date of Birth')} <span className="text-red-500">*</span>
 										</Typography>
@@ -488,16 +616,27 @@ const UserRegistrationModal: React.FC<Props> = ({
 															fullWidth: true,
 															size: 'small',
 															error: touched.dateOfBirth && Boolean(errors.dateOfBirth),
-															helperText: touched.dateOfBirth && errors.dateOfBirth,
-														},
+															helperText: touched.dateOfBirth && errors.dateOfBirth
+														}
 													}}
 													value={field.value ? new Date(field.value) : null}
-													onChange={(date) => form.setFieldValue('dateOfBirth', date ? date.toISOString() : '')}
+													onChange={(date) =>
+														form.setFieldValue(
+															'dateOfBirth',
+															date ? date.toISOString() : ''
+														)
+													}
 												/>
 											)}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Bank Account Number')} <span className="text-red-500">*</span>
 										</Typography>
@@ -511,7 +650,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.bankAccountNumber && errors.bankAccountNumber}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Bank Name')} <span className="text-red-500">*</span>
 										</Typography>
@@ -525,7 +670,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.bankName && errors.bankName}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Tax ID')} <span className="text-red-500">*</span>
 										</Typography>
@@ -539,7 +690,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.taxId && errors.taxId}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Manager ID')} <span className="text-red-500">*</span>
 										</Typography>
@@ -554,7 +711,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.managerId && errors.managerId}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Team Size')} <span className="text-red-500">*</span>
 										</Typography>
@@ -569,7 +732,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.teamSize && errors.teamSize}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Specialization')} <span className="text-red-500">*</span>
 										</Typography>
@@ -583,7 +752,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.specialization && errors.specialization}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Contract Start Date')} <span className="text-red-500">*</span>
 										</Typography>
@@ -599,17 +774,31 @@ const UserRegistrationModal: React.FC<Props> = ({
 														textField: {
 															fullWidth: true,
 															size: 'small',
-															error: touched.contractStartDate && Boolean(errors.contractStartDate),
-															helperText: touched.contractStartDate && errors.contractStartDate,
-														},
+															error:
+																touched.contractStartDate &&
+																Boolean(errors.contractStartDate),
+															helperText:
+																touched.contractStartDate && errors.contractStartDate
+														}
 													}}
 													value={field.value ? new Date(field.value) : null}
-													onChange={(date) => form.setFieldValue('contractStartDate', date ? date.toISOString() : '')}
+													onChange={(date) =>
+														form.setFieldValue(
+															'contractStartDate',
+															date ? date.toISOString() : ''
+														)
+													}
 												/>
 											)}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Contract End Date')} <span className="text-red-500">*</span>
 										</Typography>
@@ -625,17 +814,31 @@ const UserRegistrationModal: React.FC<Props> = ({
 														textField: {
 															fullWidth: true,
 															size: 'small',
-															error: touched.contractEndDate && Boolean(errors.contractEndDate),
-															helperText: touched.contractEndDate && errors.contractEndDate,
-														},
+															error:
+																touched.contractEndDate &&
+																Boolean(errors.contractEndDate),
+															helperText:
+																touched.contractEndDate && errors.contractEndDate
+														}
 													}}
 													value={field.value ? new Date(field.value) : null}
-													onChange={(date) => form.setFieldValue('contractEndDate', date ? date.toISOString() : '')}
+													onChange={(date) =>
+														form.setFieldValue(
+															'contractEndDate',
+															date ? date.toISOString() : ''
+														)
+													}
 												/>
 											)}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Hourly Rate')} <span className="text-red-500">*</span>
 										</Typography>
@@ -650,7 +853,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.hourlyRate && errors.hourlyRate}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Certifications')} <span className="text-red-500">*</span>
 										</Typography>
@@ -664,7 +873,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.certifications && errors.certifications}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Education Level')} <span className="text-red-500">*</span>
 										</Typography>
@@ -678,7 +893,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.educationLevel && errors.educationLevel}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('University')} <span className="text-red-500">*</span>
 										</Typography>
@@ -692,7 +913,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.university && errors.university}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Graduation Year')} <span className="text-red-500">*</span>
 										</Typography>
@@ -707,7 +934,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.graduationYear && errors.graduationYear}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Previous Experience Years')} <span className="text-red-500">*</span>
 										</Typography>
@@ -718,11 +951,22 @@ const UserRegistrationModal: React.FC<Props> = ({
 											type="number"
 											fullWidth
 											size="small"
-											error={touched.previousExperienceYears && Boolean(errors.previousExperienceYears)}
-											helperText={touched.previousExperienceYears && errors.previousExperienceYears}
+											error={
+												touched.previousExperienceYears &&
+												Boolean(errors.previousExperienceYears)
+											}
+											helperText={
+												touched.previousExperienceYears && errors.previousExperienceYears
+											}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Employment Status')} <span className="text-red-500">*</span>
 										</Typography>
@@ -736,10 +980,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.employmentStatus && errors.employmentStatus}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
-										<Typography>
-											{t('Probation End Date')}
-										</Typography>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
+										<Typography>{t('Probation End Date')}</Typography>
 										<Field
 											name="probationEndDate"
 											disabled={isTableMode === 'view'}
@@ -752,17 +1000,31 @@ const UserRegistrationModal: React.FC<Props> = ({
 														textField: {
 															fullWidth: true,
 															size: 'small',
-															error: touched.probationEndDate && Boolean(errors.probationEndDate),
-															helperText: touched.probationEndDate && errors.probationEndDate,
-														},
+															error:
+																touched.probationEndDate &&
+																Boolean(errors.probationEndDate),
+															helperText:
+																touched.probationEndDate && errors.probationEndDate
+														}
 													}}
 													value={field.value ? new Date(field.value) : null}
-													onChange={(date) => form.setFieldValue('probationEndDate', date ? date.toISOString() : null)}
+													onChange={(date) =>
+														form.setFieldValue(
+															'probationEndDate',
+															date ? date.toISOString() : null
+														)
+													}
 												/>
 											)}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Shift Timings')} <span className="text-red-500">*</span>
 										</Typography>
@@ -776,7 +1038,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.shiftTimings && errors.shiftTimings}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Access Level')} <span className="text-red-500">*</span>
 										</Typography>
@@ -790,7 +1058,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.accessLevel && errors.accessLevel}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Budget Authority')} <span className="text-red-500">*</span>
 										</Typography>
@@ -805,7 +1079,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.budgetAuthority && errors.budgetAuthority}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Sales Target')} <span className="text-red-500">*</span>
 										</Typography>
@@ -820,7 +1100,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.salesTarget && errors.salesTarget}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Commission Rate')} <span className="text-red-500">*</span>
 										</Typography>
@@ -835,7 +1121,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.commissionRate && errors.commissionRate}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Intern Duration Months')} <span className="text-red-500">*</span>
 										</Typography>
@@ -850,7 +1142,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.internDurationMonths && errors.internDurationMonths}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Mentor ID')} <span className="text-red-500">*</span>
 										</Typography>
@@ -865,7 +1163,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.mentorId && errors.mentorId}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Office Location')} <span className="text-red-500">*</span>
 										</Typography>
@@ -879,7 +1183,13 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.officeLocation && errors.officeLocation}
 										/>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Work Mode')} <span className="text-red-500">*</span>
 										</Typography>
@@ -893,17 +1203,29 @@ const UserRegistrationModal: React.FC<Props> = ({
 											error={touched.workMode && Boolean(errors.workMode)}
 											helperText={touched.workMode && errors.workMode}
 										>
-											<MenuItem value="" disabled>
+											<MenuItem
+												value=""
+												disabled
+											>
 												{t('Select Work Mode')}
 											</MenuItem>
 											{workModeOptions.map((option) => (
-												<MenuItem key={option} value={option}>
+												<MenuItem
+													key={option}
+													value={option}
+												>
 													{option}
 												</MenuItem>
 											))}
 										</Field>
 									</Grid>
-									<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Grid
+										item
+										lg={4}
+										md={4}
+										sm={6}
+										xs={12}
+									>
 										<Typography>
 											{t('Notes')} <span className="text-red-500">*</span>
 										</Typography>
@@ -917,7 +1239,11 @@ const UserRegistrationModal: React.FC<Props> = ({
 											helperText={touched.notes && errors.notes}
 										/>
 									</Grid>
-									<Grid item lg={12} className="flex justify-end gap-2">
+									<Grid
+										item
+										lg={12}
+										className="flex justify-end gap-2"
+									>
 										<Button
 											type="submit"
 											variant="contained"

@@ -8,19 +8,19 @@ i18next.addResourceBundle('en', 'shippingTypes', en);
 i18next.addResourceBundle('si', 'shippingTypes', si);
 i18next.addResourceBundle('ta', 'shippingTypes', ta);
 
-const ShippingTypes = lazy(() => import('./BookingType'));
+const ShippingTypes = lazy(() => import('./VehicleManagement'));
 
-const OrdersTypeConfig = {
+const SuggestionsManagementConfig = {
 	settings: {
 		layout: {}
 	},
 	permission: 'SHIPPING_TYPES',
 	routes: [
 		{
-			path: 'web/suggestions',
+			path: '/suggestions/details',
 			element: <ShippingTypes />
 		}
 	]
 };
 
-export default OrdersTypeConfig;
+export default SuggestionsManagementConfig;

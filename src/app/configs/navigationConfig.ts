@@ -167,10 +167,10 @@ const navigationConfig: FuseNavItemType[] = [
 			},
 			{
 				id: 'salesManagement.orderDetails',
-				title: 'Attendance Details',
+				title: 'Suggestions view & Manage',
 				type: 'item',
 				icon: 'heroicons-outline:document-report',
-				url: 'web/suggestions'
+				url: '/suggestions/details'
 			}
 		]
 	}
