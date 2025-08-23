@@ -23,6 +23,7 @@ import CategoryRoot from '../main/live-aquaria/sample-component/create-category/
 import OrdersRoot from '../main/live-aquaria/sample-component/orders/BookingRoot';
 import OrderDetailsRoot from '../main/live-aquaria/sample-component/orderDetails/BookingRoot';
 import SugetionsRoot from '../main/live-aquaria/sample-component/suggestions/BookingRoot';
+import SugetsionsRoot from '../main/live-aquaria/sample-component/suggestions/BookingRoot';
 
 const routeConfigs: FuseRouteConfigsType = [
 	SignOutConfig,
@@ -42,7 +43,7 @@ const routeConfigs: FuseRouteConfigsType = [
 	...CategoryRoot,
 	...OrdersRoot,
 	...OrderDetailsRoot,
-	...SugetionsRoot
+	...SugetsionsRoot
 ];
 
 /**
