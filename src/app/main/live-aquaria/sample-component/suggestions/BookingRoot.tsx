@@ -1,6 +1,6 @@
 import { FuseRouteConfigsType } from '@fuse/utils/FuseUtils';
-import SuggestionsTypesConfig from './SuggestionsTypesConfig';
+import SuggestTypeConfig from './SuggestTypeConfig';
 
-const Suggestions: FuseRouteConfigsType = [SuggestionsTypesConfig];
+const SugetionsRoot: FuseRouteConfigsType = [SuggestTypeConfig];
 
-export default Suggestions;
+export default SugetionsRoot;

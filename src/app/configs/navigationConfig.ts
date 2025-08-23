@@ -170,7 +170,7 @@ const navigationConfig: FuseNavItemType[] = [
 				title: 'Attendance Details',
 				type: 'item',
 				icon: 'heroicons-outline:document-report',
-				url: '/web/suggestions'
+				url: 'web/suggestions/types'
 			}
 		]
 	}
