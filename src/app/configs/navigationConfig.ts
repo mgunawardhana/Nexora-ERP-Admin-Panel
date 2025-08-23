@@ -160,7 +160,7 @@ const navigationConfig: FuseNavItemType[] = [
 			},
 			{
 				id: 'salesManagement.orderDetails1',
-				title: 'Report',
+				title: 'HR Decision',
 				type: 'item',
 				icon: 'heroicons-outline:document-report',
 				url: 'web/orders-details'
@@ -170,7 +170,7 @@ const navigationConfig: FuseNavItemType[] = [
 				title: 'Attendance Details',
 				type: 'item',
 				icon: 'heroicons-outline:document-report',
-				url: 'web/orders-details'
+				url: '/web/suggestions'
 			}
 		]
 	}

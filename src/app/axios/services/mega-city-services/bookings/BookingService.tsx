@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { del, get } from '../../../http/LiveAquariaServiceMethods';
 import * as url from '../url_helper';
-import { DELETE_BOOKING } from '../url_helper';
 
 export const handleAdvancedFiltrationAPI = (
 	bookingDate: any,
@@ -19,7 +18,7 @@ export const handleAdvancedFiltrationAPI = (
 		dropOffLocation,
 		carNumber,
 		driverName,
-		status,
+		status
 	};
 
 	const filteredParams = Object.entries(queryParams)
@@ -29,15 +28,11 @@ export const handleAdvancedFiltrationAPI = (
 	return get(`${url.ADVANCED_FILTERING}?${filteredParams}`);
 };
 
-export const handleFilterForRecentCompletedBookings = (
-	page: number,
-	size: number,
-	status: any
-) => {
+export const handleFilterForRecentCompletedBookings = (page: number, size: number, status: any) => {
 	const queryParams: Record<string, any> = {
 		page,
 		size,
-		status,
+		status
 	};
 
 	const filteredParams = Object.entries(queryParams)
@@ -47,6 +42,8 @@ export const handleFilterForRecentCompletedBookings = (
 	return get(`${url.ADVANCED_FILTERING}?${filteredParams}`);
 };
 
+export const deleteBooking = (id: string | number) => del(`${url.DELETE_BOOKING}${id}`);
 
-export const deleteBooking = (id: string | number) =>
-	del(`${url.DELETE_BOOKING}${id}`);
+export const getAllSuggestions = (page: number, size: number) => {
+	return get(`${url.GET_ALL_SUGGESTIONS}?page=${page}&size=${size}`);
+}

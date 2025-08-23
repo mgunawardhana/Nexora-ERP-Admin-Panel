@@ -35,3 +35,5 @@ export const fetchAnalyzingPart = () => get(`${url.FETCH_ANALYZED_PART}`);
 export const fetchRoleByOfficeLocationsForAnalytics = () => get(`${url.ROLES_BY_OFFICE_LOCATIONS_FOR_ANALYTICS}`);
 export const fetchStatusByRoleForAnalytics = () => get(`${url.STATUS_BY_ROLE_FOR_ANALYTICS}`);
 export const geminiAPICall = (data: any) => post(url.GEMINI_API_CALL, data);
+export const fetchAllSuggestions = (page: string | number, size: string | number) =>
+	get(`${url.GET_ALL_SUGGESTIONS}page=${page}&size=${size}`);
