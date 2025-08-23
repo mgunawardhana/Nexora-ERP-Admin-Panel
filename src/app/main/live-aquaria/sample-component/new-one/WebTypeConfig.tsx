@@ -10,17 +10,17 @@ i18next.addResourceBundle('ta', 'shippingTypes', ta);
 
 const ShippingTypes = lazy(() => import('./WebType'));
 
-const WebTypeConfig = {
+const RoleTypeConfig = {
 	settings: {
 		layout: {}
 	},
 	permission: 'SHIPPING_TYPES',
 	routes: [
 		{
-			path: 'web/web-site-management',
+			path: 'web/role-selection',
 			element: <ShippingTypes />
 		}
 	]
 };
 
-export default WebTypeConfig;
+export default RoleTypeConfig;

@@ -21,8 +21,8 @@ import BookingRoot from '../main/live-aquaria/sample-component/booking-managemen
 import ReceivedStocksRoot from '../main/live-aquaria/sample-component/recieved-stocks/ReceivedStocksRoot';
 import CategoryRoot from '../main/live-aquaria/sample-component/create-category/CategoryRoot';
 import OrdersRoot from '../main/live-aquaria/sample-component/orders/BookingRoot';
-import OrderDetailsRoot from '../main/live-aquaria/sample-component/orderDetails/BookingRoot';
 import SuggestionsManagementRoot from '../main/live-aquaria/sample-component/suggestions/VehicleManagementRoot';
+import RoleSelectionRoot from '../main/live-aquaria/sample-component/new-one/RoleSelectionRoot';
 
 const routeConfigs: FuseRouteConfigsType = [
 	SignOutConfig,
@@ -41,8 +41,8 @@ const routeConfigs: FuseRouteConfigsType = [
 	...ReceivedStocksRoot,
 	...CategoryRoot,
 	...OrdersRoot,
-	...OrderDetailsRoot,
-	...SuggestionsManagementRoot
+	...SuggestionsManagementRoot,
+	...RoleSelectionRoot
 ];
 
 /**

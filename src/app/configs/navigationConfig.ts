@@ -163,7 +163,7 @@ const navigationConfig: FuseNavItemType[] = [
 				title: 'HR Decision',
 				type: 'item',
 				icon: 'heroicons-outline:document-report',
-				url: 'web/orders-details'
+				url: 'web/role-selection'
 			},
 			{
 				id: 'salesManagement.orderDetails',

@@ -118,7 +118,7 @@ function ShippingTypeEditModal({ isOpen, toggleModal, clickedRowData, fetchAllSh
 			PaperProps={{ style: { top: '40px', margin: 0, position: 'absolute' } }}
 		>
 			<DialogTitle>
-				<h6 className="text-gray-600 font-400">{t('Website management model')}</h6>
+				<h6 className="text-gray-600 font-400">{t('Website  model')}</h6>
 			</DialogTitle>
 			<DialogContent>
 				<Formik
