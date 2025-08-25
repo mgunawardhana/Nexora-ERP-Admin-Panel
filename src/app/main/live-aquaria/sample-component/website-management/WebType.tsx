@@ -174,26 +174,27 @@ function WebType() {
 
 	const handleEdit = async (rowData: ShippingTypeModifiedData) => {
 		setSelectedEditRowData(rowData);
-		toggleShippingTypeEditModal();
+		toggleUserEditModal();
 	};
 
-	const handleNewShippingType = () => {
-		toggleNewShippingTypeModal();
+	const handleNewUser = () => {
+		toggleNewUserModal();
 	};
 
-	const handleSubmit1 = (values) => {};
+	const handleSubmit = (values: any) => {
+		// Handle form submission
+	};
 
 	return (
 		<div className="min-w-full max-w-[100vw]">
-			<NavigationViewComp title="Website" />
+			<NavigationViewComp title="User Management" />
 
 			<Formik
-				initialValues={{ shippingType: '', category: '', status: '' }}
+				initialValues={{}}
 				validationSchema={null}
-				onSubmit={handleSubmit1}
+				onSubmit={handleSubmit}
 			>
-				{/* eslint-disable-next-line unused-imports/no-unused-vars */}
-				{({ values }) => (
+				{() => (
 					<Form>
 						<Grid
 							container
@@ -203,38 +204,6 @@ function WebType() {
 							<Grid
 								item
 								xs={12}
-								sm={6}
-								md={4}
-								lg={3}
-								xl={2}
-								className="formikFormField pt-[5px!important]"
-							/>
-							<Grid
-								item
-								xs={12}
-								sm={6}
-								md={4}
-								lg={3}
-								xl={2}
-								className="formikFormField pt-[5px!important]"
-							/>
-							<Grid
-								item
-								xs={12}
-								sm={6}
-								md={4}
-								lg={3}
-								xl={2}
-								className="formikFormField pt-[5px!important]"
-							/>
-
-							<Grid
-								item
-								xs={12}
-								sm={6}
-								md={12}
-								lg={3}
-								xl={6}
 								className="flex justify-end items-center gap-[10px] pt-[5px!important]"
 							>
 								<Button
@@ -242,9 +211,9 @@ function WebType() {
 									type="button"
 									variant="contained"
 									size="medium"
-									onClick={handleNewShippingType}
+									onClick={handleNewUser}
 								>
-									{t('Create Article')}
+									{t('Create User')}
 								</Button>
 							</Grid>
 						</Grid>
@@ -265,27 +234,15 @@ function WebType() {
 					className="pt-[5px!important]"
 				>
 					<MaterialTableWrapper
-						title="Website Management Table"
-						filterChanged={null}
-						handleColumnFilter={null}
+						title="User Management Table"
 						tableColumns={tableColumns}
 						handlePageChange={handlePageChange}
 						handlePageSizeChange={handlePageSizeChange}
-						handleCommonSearchBar={null}
 						pageSize={pageSize}
-						disableColumnFiltering
 						loading={isTableLoading}
 						setPageSize={setPageSize}
 						pageIndex={pageNo}
-						searchByText=""
 						count={count}
-						exportToExcel={null}
-						externalAdd={null}
-						externalEdit={null}
-						externalView={null}
-						selection={false}
-						selectionExport={null}
-						isColumnChoser
 						records={sampleData}
 						tableRowViewHandler={handleView}
 						tableRowEditHandler={handleEdit}
@@ -294,58 +251,45 @@ function WebType() {
 				</Grid>
 			</Grid>
 
-			{/* New Shipping Type Modal */}
-			{isOpenNewShippingTypeModal && (
+			{/* Modals */}
+			{isOpenNewUserModal && (
 				<NewShippingTypeModel
-					isOpen={isOpenNewShippingTypeModal}
-					toggleModal={toggleNewShippingTypeModal}
-					clickedRowData={{}}
-					isTableMode="new"
-					fetchAllShippingTypes={fetchAllShippingTypes}
+					isOpen={isOpenNewUserModal}
+					toggleModal={toggleNewUserModal}
+					fetchAllShippingTypes={fetchAllUsers}
 				/>
 			)}
 
-			{/* View Modal */}
-			{isOpenShippingTypeViewModal && (
+			{isOpenUserViewModal && (
 				<ShippingTypeEditModal
-					isOpen={isOpenShippingTypeViewModal}
-					toggleModal={toggleShippingTypeViewModal}
+					isOpen={isOpenUserViewModal}
+					toggleModal={toggleUserViewModal}
 					clickedRowData={selectedViewRowData}
 					isTableMode="view"
-					fetchAllShippingTypes={fetchAllShippingTypes}
+					fetchAllShippingTypes={fetchAllUsers}
 				/>
 			)}
 
-			{/* Edit Modal */}
-			{isOpenShippingTypeEditModal && (
+			{isOpenUserEditModal && (
 				<ShippingTypeEditModal
-					isOpen={isOpenShippingTypeEditModal}
-					toggleModal={toggleShippingTypeEditModal}
+					isOpen={isOpenUserEditModal}
+					toggleModal={toggleUserEditModal}
 					clickedRowData={selectedEditRowData}
 					isTableMode="edit"
-					fetchAllShippingTypes={fetchAllShippingTypes}
+					fetchAllShippingTypes={fetchAllUsers}
 				/>
 			)}
 
-			{isOpenActiveModal && (
-				<ShippingTypeActiveComp
-					toggleModal={toggleActiveModal}
-					isOpen={isOpenActiveModal}
-					clickedRowData={selectedActiveRowData}
-					handleAlertForm={handleConfirmStatusChange}
-				/>
-			)}
-
-			{isOpenDeleteModal && (
-				<ShippingTypeDeleteAlertForm
-					toggleModal={toggleDeleteModal}
-					isOpen={isOpenDeleteModal}
-					clickedRowData={selectedDeleteRowData}
-					handleAlertForm={handleAlertForm}
-				/>
-			)}
+			{/* {isOpenDeleteModal && ( */}
+			{/*	<ShippingTypeDeleteAlertForm */}
+			{/*		toggleModal={toggleDeleteModal} */}
+			{/*		isOpen={isOpenDeleteModal} */}
+			{/*		clickedRowData={selectedDeleteRowData} */}
+			{/*		handleAlertForm={handleAlertForm} */}
+			{/*	/> */}
+			{/* )} */}
 		</div>
 	);
 }
 
-export default WebType;
+export default UserManagement;

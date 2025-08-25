@@ -8,19 +8,29 @@ import NavigationViewComp from '../../../../common/FormComponents/NavigationView
 import MaterialTableWrapper from '../../../../common/tableComponents/MaterialTableWrapper';
 import ShippingTypeEditModal from './components/ShippingTypeEditModel';
 import NewShippingTypeModel from './components/NewShippingType';
-// import {
-// 	deleteShippingType, fetchAllShippingTypesData, updateShippingTypeStatus
-// } from '../../../../axios/services/live-aquaria-services/shipping-services/ShippingTypeService';
-import { ShippingTypeModifiedData, WebTypeResp } from './types/ShippingTypes';
+import { ShippingTypeModifiedData } from './types/ShippingTypes';
 import ShippingTypeActiveComp from './components/ShippingTypeActiveComp';
 import ShippingTypeDeleteAlertForm from './components/ShippingTypeDeleteAlertForm';
+import { fetchAllUsersByPagination } from '../../../../axios/services/mega-city-services/user-management-service/UserService';
+import { deleteWebArticle } from '../../../../axios/services/mega-city-services/web-article/WebArticleService';
+
+// Define the User interface based on your API response
+interface User {
+	nationalId: string;
+	email: string;
+	department: string;
+	designation: string;
+	hr_approved: boolean;
+	finance_approved: boolean;
+	admin_approved: boolean;
+}
 
 function WebType() {
 	const { t } = useTranslation('shippingTypes');
 
-	const [pageNo, setPageNo] = useState<number>(1);
+	const [pageNo, setPageNo] = useState<number>(0);
 	const [pageSize, setPageSize] = useState<number>(5);
-	const [count, setCount] = useState<number>(100);
+	const [count, setCount] = useState<number>(0);
 
 	const [isOpenShippingTypeViewModal, setIsOpenShippingTypeViewModal] = useState<boolean>(false);
 	const toggleShippingTypeViewModal = () => setIsOpenShippingTypeViewModal(!isOpenShippingTypeViewModal);
@@ -31,7 +41,7 @@ function WebType() {
 	const [isOpenNewShippingTypeModal, setIsOpenNewShippingTypeModal] = useState<boolean>(false);
 	const toggleNewShippingTypeModal = () => setIsOpenNewShippingTypeModal(!isOpenNewShippingTypeModal);
 
-	const [sampleData, setSampleData] = useState<WebTypeResp[]>();
+	const [sampleData, setSampleData] = useState<User[]>();
 	const [isTableLoading, setTableLoading] = useState(false);
 	const [selectedActiveRowData, setSelectedActiveRowData] = useState<ShippingTypeModifiedData>(null);
 	const [selectedDeleteRowData, setSelectedDeleteRowData] = useState<ShippingTypeModifiedData>(null);
@@ -43,7 +53,7 @@ function WebType() {
 	const toggleDeleteModal = () => setOpenDeleteModal(!isOpenDeleteModal);
 
 	useEffect(() => {
-		fetchAllShippingTypes();
+		fetchAllUsers();
 	}, [pageNo, pageSize]);
 
 	const handlePageChange = (page: number) => {
@@ -56,54 +66,66 @@ function WebType() {
 
 	const tableColumns = [
 		{
-			title: t('Article Id'),
-			field: 'articleId',
-			cellStyle: {
-				padding: '6px 8px'
-			}
+			title: t('National Id'),
+			field: 'nationalId'
 		},
 		{
-			title: t('Title'),
-			field: 'title',
-			cellStyle: {
-				padding: '4px 8px'
-			}
+			title: t('Email'),
+			field: 'email'
 		},
 		{
-			title: t('Ratings'),
-			field: 'ratings',
-			cellStyle: {
-				padding: '4px 8px'
-			}
+			title: t('Department'),
+			field: 'department'
 		},
 		{
-			title: t('Author'),
-			field: 'author',
-			cellStyle: {
-				padding: '4px 8px'
-			}
+			title: t('Designation'),
+			field: 'designation'
 		},
 		{
-			title: t('Is Active'),
-			field: 'is_active',
-			cellStyle: {
-				padding: '4px 8px'
-			},
-			render: (rowData) => (
+			title: t('HR Approved'),
+			field: 'hr_approved',
+			render: (rowData: User) => (
 				<span
 					style={{
-						display: 'inline-block',
+						color: rowData.hr_approved ? '#4CAF50' : '#F44336',
+						backgroundColor: rowData.hr_approved ? '#E8F5E9' : '#FFEBEE',
 						padding: '4px 12px',
-						borderRadius: '16px',
-						color: rowData.is_active ? '#4CAF50' : '#F44336', // Green for active, red for inactive
-						backgroundColor: rowData.is_active ? '#E8F5E9' : '#FFEBEE', // Light green/red for background
-						fontSize: '12px',
-						fontWeight: 500,
-						textAlign: 'center',
-						minWidth: '70px' // Optional for consistent size
+						borderRadius: '16px'
 					}}
 				>
-					{rowData.is_active ? t('Active') : t('Inactive')}
+					{rowData.hr_approved ? t('Approved') : t('Pending')}
+				</span>
+			)
+		},
+		{
+			title: t('Finance Approved'),
+			field: 'finance_approved',
+			render: (rowData: User) => (
+				<span
+					style={{
+						color: rowData.finance_approved ? '#4CAF50' : '#F44336',
+						backgroundColor: rowData.finance_approved ? '#E8F5E9' : '#FFEBEE',
+						padding: '4px 12px',
+						borderRadius: '16px'
+					}}
+				>
+					{rowData.finance_approved ? t('Approved') : t('Pending')}
+				</span>
+			)
+		},
+		{
+			title: t('Admin Approved'),
+			field: 'admin_approved',
+			render: (rowData: User) => (
+				<span
+					style={{
+						color: rowData.admin_approved ? '#4CAF50' : '#F44336',
+						backgroundColor: rowData.admin_approved ? '#E8F5E9' : '#FFEBEE',
+						padding: '4px 12px',
+						borderRadius: '16px'
+					}}
+				>
+					{rowData.admin_approved ? t('Approved') : t('Pending')}
 				</span>
 			)
 		}
@@ -111,39 +133,43 @@ function WebType() {
 
 	const handleConfirmStatusChange = async () => {
 		toggleActiveModal();
-
 		const id = selectedActiveRowData?.id ?? null;
 		try {
 			const data = {
 				is_active: !selectedActiveRowData?.active
 			};
-			await updateShippingTypeStatus(id, data);
-			await fetchAllShippingTypes();
+			// This function seems to be missing from your services, you might need to implement it
+			// await updateSomeStatus(id, data);
+			await fetchAllUsers();
 			toast.success('Status updated successfully');
 		} catch (error) {
 			toast.error('Error updating status:');
 		}
 	};
 
-	const fetchAllShippingTypes = async () => {
+	const fetchAllUsers = async () => {
 		setTableLoading(true);
 		try {
-			const response = await fetchAllShippingTypesData(pageNo, pageSize);
+			const response = await fetchAllUsersByPagination(pageNo, pageSize);
 
-			console.log('API Response:', response);
-
-			if (response && Array.isArray(response.result)) {
-				const transformedData: WebTypeResp[] = response.result.map((item) => ({
-					...item
+			if (response && response.result && Array.isArray(response.result.content)) {
+				const transformedData: User[] = response.result.content.map((item: any) => ({
+					nationalId: item.nationalId,
+					email: item.email,
+					department: item.department,
+					designation: item.designation,
+					hr_approved: item.hr_approved,
+					finance_approved: item.finance_approved,
+					admin_approved: item.admin_approved
 				}));
-
 				setSampleData(transformedData);
+				setCount(response.result.totalElements);
 			} else {
 				console.error('Unexpected data format:', response);
 				setSampleData([]);
 			}
 		} catch (error) {
-			console.error('Error fetching shipping types:', error);
+			console.error('Error fetching users:', error);
 			toast.error('Error fetching data');
 			setSampleData([]);
 		} finally {
@@ -158,13 +184,13 @@ function WebType() {
 
 	const handleAlertForm = async () => {
 		toggleDeleteModal();
-		const id = selectedDeleteRowData?.id ?? null;
 		try {
-			await deleteShippingType(id);
-			fetchAllShippingTypes();
-			toast.success('Shipping Type deleted successfully');
+			// Assuming nationalId is the unique identifier for deletion
+			await deleteWebArticle(selectedDeleteRowData?.nationalId);
+			await fetchAllUsers();
+			toast.success('User deleted successfully');
 		} catch (e) {
-			toast.error('Error deleting Shipping Type');
+			toast.error('Error deleting user');
 		}
 	};
 
@@ -186,14 +212,13 @@ function WebType() {
 
 	return (
 		<div className="min-w-full max-w-[100vw]">
-			<NavigationViewComp title="Website" />
+			<NavigationViewComp title="User Management" />
 
 			<Formik
-				initialValues={{ shippingType: '', category: '', status: '' }}
+				initialValues={{}}
 				validationSchema={null}
 				onSubmit={handleSubmit1}
 			>
-				{/* eslint-disable-next-line unused-imports/no-unused-vars */}
 				{({ values }) => (
 					<Form>
 						<Grid
@@ -205,49 +230,11 @@ function WebType() {
 								item
 								xs={12}
 								sm={6}
-								md={4}
-								lg={3}
-								xl={2}
-								className="formikFormField pt-[5px!important]"
-							/>
-							<Grid
-								item
-								xs={12}
-								sm={6}
-								md={4}
-								lg={3}
-								xl={2}
-								className="formikFormField pt-[5px!important]"
-							/>
-							<Grid
-								item
-								xs={12}
-								sm={6}
-								md={4}
-								lg={3}
-								xl={2}
-								className="formikFormField pt-[5px!important]"
-							/>
-
-							<Grid
-								item
-								xs={12}
-								sm={6}
 								md={12}
 								lg={3}
 								xl={6}
 								className="flex justify-end items-center gap-[10px] pt-[5px!important]"
 							>
-								{/* <Button */}
-								{/*	className="flex justify-center items-center min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-gray-600 font-500 py-0 rounded-[6px] bg-gray-300 hover:bg-gray-300/80" */}
-								{/*	type="submit" */}
-								{/*	variant="contained" */}
-								{/*	size="medium" */}
-								{/*	disabled={false} */}
-								{/* > */}
-								{/*	{t('FILTER_ALL')} */}
-								{/* </Button> */}
-
 								<Button
 									className="min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-white font-500 py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
 									type="button"
@@ -255,7 +242,7 @@ function WebType() {
 									size="medium"
 									onClick={handleNewShippingType}
 								>
-									{t('Create Article')}
+									{t('Create User')}
 								</Button>
 							</Grid>
 						</Grid>
@@ -276,66 +263,50 @@ function WebType() {
 					className="pt-[5px!important]"
 				>
 					<MaterialTableWrapper
-						title=""
-						filterChanged={null}
-						handleColumnFilter={null}
+						title="User  Table"
 						tableColumns={tableColumns}
 						handlePageChange={handlePageChange}
 						handlePageSizeChange={handlePageSizeChange}
-						handleCommonSearchBar={null}
 						pageSize={pageSize}
-						disableColumnFiltering
 						loading={isTableLoading}
 						setPageSize={setPageSize}
 						pageIndex={pageNo}
-						searchByText=""
 						count={count}
-						exportToExcel={null}
-						externalAdd={null}
-						externalEdit={null}
-						externalView={null}
-						selection={false}
-						selectionExport={null}
-						isColumnChoser
-						disableSearch
 						records={sampleData}
 						tableRowViewHandler={handleView}
 						tableRowEditHandler={handleEdit}
 						tableRowDeleteHandler={handleRowDelete}
+						disableColumnFiltering
 					/>
 				</Grid>
 			</Grid>
 
-			{/* New Shipping Type Modal */}
+			{/* Modals */}
 			{isOpenNewShippingTypeModal && (
 				<NewShippingTypeModel
 					isOpen={isOpenNewShippingTypeModal}
 					toggleModal={toggleNewShippingTypeModal}
-					clickedRowData={{}}
-					isTableMode="new"
-					fetchAllShippingTypes={fetchAllShippingTypes}
+					fetchAllShippingTypes={fetchAllUsers}
 				/>
 			)}
 
-			{/* View Modal */}
 			{isOpenShippingTypeViewModal && (
 				<ShippingTypeEditModal
 					isOpen={isOpenShippingTypeViewModal}
 					toggleModal={toggleShippingTypeViewModal}
 					clickedRowData={selectedViewRowData}
 					isTableMode="view"
-					fetchAllShippingTypes={fetchAllShippingTypes}
+					fetchAllShippingTypes={fetchAllUsers}
 				/>
 			)}
 
-			{/* Edit Modal */}
 			{isOpenShippingTypeEditModal && (
 				<ShippingTypeEditModal
 					isOpen={isOpenShippingTypeEditModal}
 					toggleModal={toggleShippingTypeEditModal}
 					clickedRowData={selectedEditRowData}
 					isTableMode="edit"
-					fetchAllShippingTypes={fetchAllShippingTypes}
+					fetchAllShippingTypes={fetchAllUsers}
 				/>
 			)}
 

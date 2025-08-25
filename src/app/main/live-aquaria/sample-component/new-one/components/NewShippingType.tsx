@@ -7,18 +7,17 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
-	FormControlLabel,
 	Grid,
 	Typography,
-	IconButton,
+	IconButton
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
-import TextFormField from '../../../../../common/FormComponents/FormTextField';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import TextFormField from '../../../../../common/FormComponents/FormTextField';
 import { ShippingCreateType } from '../types/ShippingTypes';
 
 interface Image {
@@ -44,7 +43,7 @@ function NewShippingTypeModel({ isOpen, toggleModal, clickedRowData, fetchAllShi
 	const maxImageSize = 5 * 1024 * 1024; // 5MB
 
 	const schema = yup.object().shape({
-		shippingType: yup.string().required(t('Shipping type name is required')),
+		shippingType: yup.string().required(t('Shipping type name is required'))
 	});
 
 	const convertToBase64 = (file: File): Promise<string> => {
@@ -90,7 +89,7 @@ function NewShippingTypeModel({ isOpen, toggleModal, clickedRowData, fetchAllShi
 						id: Date.now(),
 						link: URL.createObjectURL(file),
 						file,
-						base64,
+						base64
 					});
 				}
 			}
@@ -112,7 +111,7 @@ function NewShippingTypeModel({ isOpen, toggleModal, clickedRowData, fetchAllShi
 			description: values.description,
 			author: values.author,
 			media: images.length > 0 ? images[0].base64 : null,
-			is_active: values.is_active,
+			is_active: values.is_active
 		};
 
 		console.log('Form Data:', data);
@@ -136,28 +135,95 @@ function NewShippingTypeModel({ isOpen, toggleModal, clickedRowData, fetchAllShi
 				>
 					{({ setFieldValue }) => (
 						<Form>
-							<Grid container spacing={2}>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
-									<Typography>{t('Title')}<span className="text-red"> *</span></Typography>
-									<Field name="title" component={TextFormField} fullWidth size="small" />
+							<Grid
+								container
+								spacing={2}
+							>
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
+									<Typography>
+										{t('Title')}
+										<span className="text-red"> *</span>
+									</Typography>
+									<Field
+										name="title"
+										component={TextFormField}
+										fullWidth
+										size="small"
+									/>
 								</Grid>
 
-								<Grid item lg={4} md={4} sm={6} xs={12}>
-									<Typography>{t('Description')}<span className="text-red"> *</span></Typography>
-									<Field name="description" component={TextFormField} fullWidth size="small" />
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
+									<Typography>
+										{t('Description')}
+										<span className="text-red"> *</span>
+									</Typography>
+									<Field
+										name="description"
+										component={TextFormField}
+										fullWidth
+										size="small"
+									/>
 								</Grid>
 
-								<Grid item lg={4} md={4} sm={6} xs={12}>
-									<Typography>{t('Author')}<span className="text-red"> *</span></Typography>
-									<Field name="author" component={TextFormField} fullWidth size="small" />
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
+									<Typography>
+										{t('Author')}
+										<span className="text-red"> *</span>
+									</Typography>
+									<Field
+										name="author"
+										component={TextFormField}
+										fullWidth
+										size="small"
+									/>
 								</Grid>
 
-								<Grid item lg={4} md={4} sm={6} xs={12}>
-									<Typography>{t('Ratings')}<span className="text-red"> *</span></Typography>
-									<Field type="number" name="discount" component={TextFormField} fullWidth size="small" />
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
+									<Typography>
+										{t('Ratings')}
+										<span className="text-red"> *</span>
+									</Typography>
+									<Field
+										type="number"
+										name="discount"
+										component={TextFormField}
+										fullWidth
+										size="small"
+									/>
 								</Grid>
 
-								<Grid item lg={4} md={4} sm={6} xs={12} className="flex items-center">
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+									className="flex items-center"
+								>
 									<Typography className="mr-2">{t('Is Active')}</Typography>
 									<Checkbox
 										color="primary"
@@ -165,12 +231,18 @@ function NewShippingTypeModel({ isOpen, toggleModal, clickedRowData, fetchAllShi
 									/>
 								</Grid>
 
-
-								<Grid item md={6} xs={12}>
+								<Grid
+									item
+									md={6}
+									xs={12}
+								>
 									<Typography className="text-[10px] sm:text-[12px] lg:text-[14px] font-600 mb-[5px]">
 										{t('Upload Thumbnail Image')}
 									</Typography>
-									<div className="relative flex gap-[10px] overflow-x-auto" style={{ whiteSpace: 'nowrap' }}>
+									<div
+										className="relative flex gap-[10px] overflow-x-auto"
+										style={{ whiteSpace: 'nowrap' }}
+									>
 										{images.map((image) => (
 											<div
 												key={image.id}
@@ -211,17 +283,33 @@ function NewShippingTypeModel({ isOpen, toggleModal, clickedRowData, fetchAllShi
 										)}
 									</div>
 									<span className="text-[10px] text-gray-700 italic">
-                                        <b className="text-red">Note:</b> Image dimensions must be 2:1, and size ≤ 5MB.
-                                    </span>
+										<b className="text-red">Note:</b> Image dimensions must be 2:1, and size ≤ 5MB.
+									</span>
 								</Grid>
 
-
-								<Grid item lg={12} className="flex justify-end gap-2">
-									<Button type="submit" variant="contained" className="bg-yellow-800 text-white searchButton">
+								<Grid
+									item
+									lg={12}
+									className="flex justify-end gap-2"
+								>
+									<Button
+										type="submit"
+										variant="contained"
+										className="bg-yellow-800 text-white searchButton"
+									>
 										{t('Save')}
-										{isDataLoading && <CircularProgress size={24} className="ml-2" />}
+										{isDataLoading && (
+											<CircularProgress
+												size={24}
+												className="ml-2"
+											/>
+										)}
 									</Button>
-									<Button variant="contained" className="flex justify-center items-center min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-gray-600 font-500 py-0 rounded-[6px] bg-gray-300 hover:bg-gray-300/80" onClick={toggleModal}>
+									<Button
+										variant="contained"
+										className="flex justify-center items-center min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-gray-600 font-500 py-0 rounded-[6px] bg-gray-300 hover:bg-gray-300/80"
+										onClick={toggleModal}
+									>
 										{t('Cancel')}
 									</Button>
 								</Grid>
