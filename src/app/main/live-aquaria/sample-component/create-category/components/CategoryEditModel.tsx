@@ -13,54 +13,38 @@ import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TextFormField from '../../../../../common/FormComponents/FormTextField';
 
 interface UserType {
-	role: string;
-	firstName: string;
-	lastName: string;
-	email: string;
-	password: string;
-	address: string;
-	nationalId: string;
-	phoneNumber: string;
-	employeeCode: string;
-	department: string;
-	designation: string;
-	joinDate: string;
-	currentSalary: number;
-	emergencyContactName: string;
-	emergencyContactPhone: string;
-	dateOfBirth: string;
-	bankAccountNumber: string;
-	bankName: string;
-	taxId: string;
-	managerId: number;
-	teamSize: number;
-	specialization: string;
-	contractStartDate: string;
-	contractEndDate: string;
-	hourlyRate: number;
-	certifications: string;
-	educationLevel: string;
-	university: string;
-	graduationYear: number;
-	previousExperienceYears: number;
-	employmentStatus: string;
-	probationEndDate: string | null;
-	shiftTimings: string;
-	accessLevel: string;
-	budgetAuthority: number;
-	salesTarget: number;
-	commissionRate: number;
-	internDurationMonths: number;
-	mentorId: number;
-	officeLocation: string;
-	workMode: string;
-	notes: string;
+	employee_name: string;
+	Age: number;
+	BusinessTravel: string;
+	DailyRate: number;
+	Department: string;
+	DistanceFromHome: number;
+	Education: number;
+	EducationField: string;
+	EnvironmentSatisfaction: number;
+	Gender: string;
+	HourlyRate: number;
+	JobInvolvement: number;
+	JobLevel: number;
+	JobRole: string;
+	JobSatisfaction: number;
+	MaritalStatus: string;
+	MonthlyIncome: number;
+	MonthlyRate: number;
+	NumCompaniesWorked: number;
+	OverTime: string;
+	RelationshipSatisfaction: number;
+	StockOptionLevel: number;
+	TotalWorkingYears: number;
+	TrainingTimesLastYear: number;
+	WorkLifeBalance: number;
+	YearsAtCompany: number;
+	YearsInCurrentRole: number;
+	YearsSinceLastPromotion: number;
+	YearsWithCurrManager: number;
 }
 
 interface Props {
@@ -72,85 +56,91 @@ interface Props {
 }
 
 const UserRegistrationModal: React.FC<Props> = ({
-	isOpen,
-	toggleModal,
-	clickedRowData,
-	fetchAllUsers,
-	isTableMode
-}) => {
+													isOpen,
+													toggleModal,
+													clickedRowData,
+													fetchAllUsers,
+													isTableMode
+												}) => {
 	const { t } = useTranslation('userRegistration');
 	const [isDataLoading, setDataLoading] = useState<boolean>(false);
 
-	const generateEmployeeCode = (): string => {
-		return `EMP${Math.floor(Math.random() * 1000)
-			.toString()
-			.padStart(3, '0')}`;
-	};
-
-	const roleOptions = ['ADMIN', 'USER', 'MANAGER', 'EMPLOYEE'];
-	const departmentOptions = ['Human Resources', 'Engineering', 'Marketing', 'Finance'];
-	const workModeOptions = ['OFFICE', 'REMOTE', 'HYBRID'];
+	const educationOptions = [
+		{ value: 1, label: 'Below College' },
+		{ value: 2, label: 'College' },
+		{ value: 3, label: 'Bachelor' },
+		{ value: 4, label: 'Master' },
+		{ value: 5, label: 'Doctor' }
+	];
+	const environmentSatisfactionOptions = [
+		{ value: 1, label: 'Low' },
+		{ value: 2, label: 'Medium' },
+		{ value: 3, label: 'High' },
+		{ value: 4, label: 'Very High' }
+	];
+	const jobInvolvementOptions = [
+		{ value: 1, label: 'Low' },
+		{ value: 2, label: 'Medium' },
+		{ value: 3, label: 'High' },
+		{ value: 4, label: 'Very High' }
+	];
+	const jobSatisfactionOptions = [
+		{ value: 1, label: 'Low' },
+		{ value: 2, label: 'Medium' },
+		{ value: 3, label: 'High' },
+		{ value: 4, label: 'Very High' }
+	];
+	const relationshipSatisfactionOptions = [
+		{ value: 1, label: 'Low' },
+		{ value: 2, label: 'Medium' },
+		{ value: 3, label: 'High' },
+		{ value: 4, label: 'Very High' }
+	];
+	const workLifeBalanceOptions = [
+		{ value: 1, label: 'Bad' },
+		{ value: 2, label: 'Good' },
+		{ value: 3, label: 'Better' },
+		{ value: 4, label: 'Best' }
+	];
 
 	const validationSchema = yup.object().shape({
-		role: yup.string().required(t('Role is required')).oneOf(roleOptions),
-		firstName: yup.string().required(t('First Name is required')).trim(),
-		lastName: yup.string().required(t('Last Name is required')).trim(),
-		email: yup.string().email(t('Invalid email')).required(t('Email is required')).trim(),
-		password: yup.string().when('isTableMode', {
-			is: 'new',
-			then: yup.string().required(t('Password is required')).min(8, t('Password must be at least 8 characters')),
-			otherwise: yup.string()
-		}),
-		address: yup.string().required(t('Address is required')).trim(),
-		nationalId: yup.string().required(t('National ID is required')).trim(),
-		phoneNumber: yup.string().required(t('Phone Number is required')).trim(),
-		employeeCode: yup.string().required(t('Employee Code is required')).trim(),
-		department: yup.string().required(t('Department is required')).oneOf(departmentOptions),
-		designation: yup.string().required(t('Designation is required')).trim(),
-		joinDate: yup.date().required(t('Join Date is required')),
-		currentSalary: yup.number().required(t('Current Salary is required')).positive(),
-		emergencyContactName: yup.string().required(t('Emergency Contact Name is required')).trim(),
-		emergencyContactPhone: yup.string().required(t('Emergency Contact Phone is required')).trim(),
-		dateOfBirth: yup.date().required(t('Date of Birth is required')),
-		bankAccountNumber: yup.string().required(t('Bank Account Number is required')).trim(),
-		bankName: yup.string().required(t('Bank Name is required')).trim(),
-		taxId: yup.string().required(t('Tax ID is required')).trim(),
-		managerId: yup.number().required(t('Manager ID is required')).positive().integer(),
-		teamSize: yup.number().required(t('Team Size is required')).min(0).integer(),
-		specialization: yup.string().required(t('Specialization is required')).trim(),
-		contractStartDate: yup.date().required(t('Contract Start Date is required')),
-		contractEndDate: yup.date().required(t('Contract End Date is required')),
-		hourlyRate: yup.number().required(t('Hourly Rate is required')).positive(),
-		certifications: yup.string().required(t('Certifications are required')).trim(),
-		educationLevel: yup.string().required(t('Education Level is required')).trim(),
-		university: yup.string().required(t('University is required')).trim(),
-		graduationYear: yup.number().required(t('Graduation Year is required')).positive().integer(),
-		previousExperienceYears: yup.number().required(t('Previous Experience Years is required')).min(0).integer(),
-		employmentStatus: yup.string().required(t('Employment Status is required')).trim(),
-		probationEndDate: yup.date().nullable(),
-		shiftTimings: yup.string().required(t('Shift Timings is required')).trim(),
-		accessLevel: yup.string().required(t('Access Level is required')).trim(),
-		budgetAuthority: yup.number().required(t('Budget Authority is required')).min(0),
-		salesTarget: yup.number().required(t('Sales Target is required')).min(0),
-		commissionRate: yup.number().required(t('Commission Rate is required')).min(0),
-		internDurationMonths: yup.number().required(t('Intern Duration Months is required')).min(0).integer(),
-		mentorId: yup.number().required(t('Mentor ID is required')).positive().integer(),
-		officeLocation: yup.string().required(t('Office Location is required')).trim(),
-		workMode: yup.string().required(t('Work Mode is required')).oneOf(workModeOptions),
-		notes: yup.string().required(t('Notes are required')).trim()
+		employee_name: yup.string().required(t('Employee Name is required')).trim(),
+		Age: yup.number().required(t('Age is required')).positive().integer(),
+		BusinessTravel: yup.string().required(t('Business Travel is required')).trim(),
+		DailyRate: yup.number().required(t('Daily Rate is required')).positive(),
+		Department: yup.string().required(t('Department is required')).trim(),
+		DistanceFromHome: yup.number().required(t('Distance From Home is required')).positive(),
+		Education: yup.number().required(t('Education is required')),
+		EducationField: yup.string().required(t('Education Field is required')).trim(),
+		EnvironmentSatisfaction: yup.number().required(t('Environment Satisfaction is required')),
+		Gender: yup.string().required(t('Gender is required')).trim(),
+		HourlyRate: yup.number().required(t('Hourly Rate is required')).positive(),
+		JobInvolvement: yup.number().required(t('Job Involvement is required')),
+		JobLevel: yup.number().required(t('Job Level is required')).positive().integer(),
+		JobRole: yup.string().required(t('Job Role is required')).trim(),
+		JobSatisfaction: yup.number().required(t('Job Satisfaction is required')),
+		MaritalStatus: yup.string().required(t('Marital Status is required')).trim(),
+		MonthlyIncome: yup.number().required(t('Monthly Income is required')).positive(),
+		MonthlyRate: yup.number().required(t('Monthly Rate is required')).positive(),
+		NumCompaniesWorked: yup.number().required(t('Number of Companies Worked is required')).min(0).integer(),
+		OverTime: yup.string().required(t('Over Time is required')).trim(),
+		RelationshipSatisfaction: yup.number().required(t('Relationship Satisfaction is required')),
+		StockOptionLevel: yup.number().required(t('Stock Option Level is required')).min(0).integer(),
+		TotalWorkingYears: yup.number().required(t('Total Working Years is required')).min(0).integer(),
+		TrainingTimesLastYear: yup.number().required(t('Training Times Last Year is required')).min(0).integer(),
+		WorkLifeBalance: yup.number().required(t('Work Life Balance is required')),
+		YearsAtCompany: yup.number().required(t('Years At Company is required')).min(0).integer(),
+		YearsInCurrentRole: yup.number().required(t('Years In Current Role is required')).min(0).integer(),
+		YearsSinceLastPromotion: yup.number().required(t('Years Since Last Promotion is required')).min(0).integer(),
+		YearsWithCurrManager: yup.number().required(t('Years With Current Manager is required')).min(0).integer()
 	});
 
 	const handleSubmit = async (values: UserType) => {
-		const data: UserType = {
-			...values,
-			employeeCode: values.employeeCode || generateEmployeeCode()
-		};
-
 		try {
 			setDataLoading(true);
-			console.log('Submitted User Data:', data);
+			console.log('Submitted User Data:', values);
 
-			if (clickedRowData?.employeeCode && isTableMode === 'edit') {
+			if (isTableMode === 'edit') {
 				// await updateUser(clickedRowData._id, data); // Uncomment and implement API call
 				fetchAllUsers();
 				toggleModal();
@@ -169,1110 +159,569 @@ const UserRegistrationModal: React.FC<Props> = ({
 	};
 
 	const initialValues: UserType = {
-		role: clickedRowData?.role || '',
-		firstName: clickedRowData?.firstName || '',
-		lastName: clickedRowData?.lastName || '',
-		email: clickedRowData?.email || '',
-		password: clickedRowData?.password || '',
-		address: clickedRowData?.address || '',
-		nationalId: clickedRowData?.nationalId || '',
-		phoneNumber: clickedRowData?.phoneNumber || '',
-		employeeCode: clickedRowData?.employeeCode || generateEmployeeCode(),
-		department: clickedRowData?.department || '',
-		designation: clickedRowData?.designation || '',
-		joinDate: clickedRowData?.joinDate || '',
-		currentSalary: clickedRowData?.currentSalary || 0,
-		emergencyContactName: clickedRowData?.emergencyContactName || '',
-		emergencyContactPhone: clickedRowData?.emergencyContactPhone || '',
-		dateOfBirth: clickedRowData?.dateOfBirth || '',
-		bankAccountNumber: clickedRowData?.bankAccountNumber || '',
-		bankName: clickedRowData?.bankName || '',
-		taxId: clickedRowData?.taxId || '',
-		managerId: clickedRowData?.managerId || 0,
-		teamSize: clickedRowData?.teamSize || 0,
-		specialization: clickedRowData?.specialization || '',
-		contractStartDate: clickedRowData?.contractStartDate || '',
-		contractEndDate: clickedRowData?.contractEndDate || '',
-		hourlyRate: clickedRowData?.hourlyRate || 0,
-		certifications: clickedRowData?.certifications || '',
-		educationLevel: clickedRowData?.educationLevel || '',
-		university: clickedRowData?.university || '',
-		graduationYear: clickedRowData?.graduationYear || 0,
-		previousExperienceYears: clickedRowData?.previousExperienceYears || 0,
-		employmentStatus: clickedRowData?.employmentStatus || '',
-		probationEndDate: clickedRowData?.probationEndDate || null,
-		shiftTimings: clickedRowData?.shiftTimings || '',
-		accessLevel: clickedRowData?.accessLevel || '',
-		budgetAuthority: clickedRowData?.budgetAuthority || 0,
-		salesTarget: clickedRowData?.salesTarget || 0,
-		commissionRate: clickedRowData?.commissionRate || 0,
-		internDurationMonths: clickedRowData?.internDurationMonths || 0,
-		mentorId: clickedRowData?.mentorId || 0,
-		officeLocation: clickedRowData?.officeLocation || '',
-		workMode: clickedRowData?.workMode || '',
-		notes: clickedRowData?.notes || ''
+		employee_name: clickedRowData?.employee_name || '',
+		Age: clickedRowData?.Age || 0,
+		BusinessTravel: clickedRowData?.BusinessTravel || '',
+		DailyRate: clickedRowData?.DailyRate || 0,
+		Department: clickedRowData?.Department || '',
+		DistanceFromHome: clickedRowData?.DistanceFromHome || 0,
+		Education: clickedRowData?.Education || 0,
+		EducationField: clickedRowData?.EducationField || '',
+		EnvironmentSatisfaction: clickedRowData?.EnvironmentSatisfaction || 0,
+		Gender: clickedRowData?.Gender || '',
+		HourlyRate: clickedRowData?.HourlyRate || 0,
+		JobInvolvement: clickedRowData?.JobInvolvement || 0,
+		JobLevel: clickedRowData?.JobLevel || 0,
+		JobRole: clickedRowData?.JobRole || '',
+		JobSatisfaction: clickedRowData?.JobSatisfaction || 0,
+		MaritalStatus: clickedRowData?.MaritalStatus || '',
+		MonthlyIncome: clickedRowData?.MonthlyIncome || 0,
+		MonthlyRate: clickedRowData?.MonthlyRate || 0,
+		NumCompaniesWorked: clickedRowData?.NumCompaniesWorked || 0,
+		OverTime: clickedRowData?.OverTime || '',
+		RelationshipSatisfaction: clickedRowData?.RelationshipSatisfaction || 0,
+		StockOptionLevel: clickedRowData?.StockOptionLevel || 0,
+		TotalWorkingYears: clickedRowData?.TotalWorkingYears || 0,
+		TrainingTimesLastYear: clickedRowData?.TrainingTimesLastYear || 0,
+		WorkLifeBalance: clickedRowData?.WorkLifeBalance || 0,
+		YearsAtCompany: clickedRowData?.YearsAtCompany || 0,
+		YearsInCurrentRole: clickedRowData?.YearsInCurrentRole || 0,
+		YearsSinceLastPromotion: clickedRowData?.YearsSinceLastPromotion || 0,
+		YearsWithCurrManager: clickedRowData?.YearsWithCurrManager || 0
 	};
 
 	return (
-		<LocalizationProvider dateAdapter={AdapterDateFns}>
-			<Dialog
-				open={isOpen}
-				maxWidth="xl"
-				onClose={toggleModal}
-				PaperProps={{ style: { top: '40px', margin: 0, position: 'absolute' } }}
-			>
-				<DialogTitle>
-					<Typography
-						variant="h6"
-						color="textSecondary"
-						fontWeight={400}
-					>
-						{t('User Registration')}
-					</Typography>
-				</DialogTitle>
-				<DialogContent>
-					<Formik
-						initialValues={initialValues}
-						onSubmit={handleSubmit}
-						validationSchema={validationSchema}
-						enableReinitialize
-					>
-						{({ errors, touched, setFieldValue, values }) => (
-							<Form>
-								<Grid
-									container
-									spacing={2}
-								>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Role')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											as="select"
-											name="role"
-											disabled={isTableMode === 'view'}
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.role && Boolean(errors.role)}
-											helperText={touched.role && errors.role}
-										>
-											<MenuItem
-												value=""
-												disabled
-											>
-												{t('Select Role')}
-											</MenuItem>
-											{roleOptions.map((option) => (
-												<MenuItem
-													key={option}
-													value={option}
-												>
-													{option}
-												</MenuItem>
-											))}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('First Name')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="firstName"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.firstName && Boolean(errors.firstName)}
-											helperText={touched.firstName && errors.firstName}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Last Name')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="lastName"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.lastName && Boolean(errors.lastName)}
-											helperText={touched.lastName && errors.lastName}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Email')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="email"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.email && Boolean(errors.email)}
-											helperText={touched.email && errors.email}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Password')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="password"
-											component={TextFormField}
-											type="password"
-											fullWidth
-											size="small"
-											error={touched.password && Boolean(errors.password)}
-											helperText={touched.password && errors.password}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Address')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="address"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.address && Boolean(errors.address)}
-											helperText={touched.address && errors.address}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('National ID')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="nationalId"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.nationalId && Boolean(errors.nationalId)}
-											helperText={touched.nationalId && errors.nationalId}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Phone Number')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="phoneNumber"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.phoneNumber && Boolean(errors.phoneNumber)}
-											helperText={touched.phoneNumber && errors.phoneNumber}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Employee Code')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled
-											name="employeeCode"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.employeeCode && Boolean(errors.employeeCode)}
-											helperText={touched.employeeCode && errors.employeeCode}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Department')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											as="select"
-											name="department"
-											disabled={isTableMode === 'view'}
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.department && Boolean(errors.department)}
-											helperText={touched.department && errors.department}
-										>
-											<MenuItem
-												value=""
-												disabled
-											>
-												{t('Select Department')}
-											</MenuItem>
-											{departmentOptions.map((option) => (
-												<MenuItem
-													key={option}
-													value={option}
-												>
-													{option}
-												</MenuItem>
-											))}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Designation')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="designation"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.designation && Boolean(errors.designation)}
-											helperText={touched.designation && errors.designation}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Join Date')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											name="joinDate"
-											disabled={isTableMode === 'view'}
-										>
-											{({ field, form }: any) => (
-												<DatePicker
-													{...field}
-													disabled={isTableMode === 'view'}
-													slotProps={{
-														textField: {
-															fullWidth: true,
-															size: 'small',
-															error: touched.joinDate && Boolean(errors.joinDate),
-															helperText: touched.joinDate && errors.joinDate
-														}
-													}}
-													value={field.value ? new Date(field.value) : null}
-													onChange={(date) =>
-														form.setFieldValue('joinDate', date ? date.toISOString() : '')
-													}
-												/>
-											)}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Current Salary')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="currentSalary"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.currentSalary && Boolean(errors.currentSalary)}
-											helperText={touched.currentSalary && errors.currentSalary}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Emergency Contact Name')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="emergencyContactName"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.emergencyContactName && Boolean(errors.emergencyContactName)}
-											helperText={touched.emergencyContactName && errors.emergencyContactName}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Emergency Contact Phone')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="emergencyContactPhone"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={
-												touched.emergencyContactPhone && Boolean(errors.emergencyContactPhone)
-											}
-											helperText={touched.emergencyContactPhone && errors.emergencyContactPhone}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Date of Birth')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											name="dateOfBirth"
-											disabled={isTableMode === 'view'}
-										>
-											{({ field, form }: any) => (
-												<DatePicker
-													{...field}
-													disabled={isTableMode === 'view'}
-													slotProps={{
-														textField: {
-															fullWidth: true,
-															size: 'small',
-															error: touched.dateOfBirth && Boolean(errors.dateOfBirth),
-															helperText: touched.dateOfBirth && errors.dateOfBirth
-														}
-													}}
-													value={field.value ? new Date(field.value) : null}
-													onChange={(date) =>
-														form.setFieldValue(
-															'dateOfBirth',
-															date ? date.toISOString() : ''
-														)
-													}
-												/>
-											)}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Bank Account Number')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="bankAccountNumber"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.bankAccountNumber && Boolean(errors.bankAccountNumber)}
-											helperText={touched.bankAccountNumber && errors.bankAccountNumber}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Bank Name')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="bankName"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.bankName && Boolean(errors.bankName)}
-											helperText={touched.bankName && errors.bankName}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Tax ID')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="taxId"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.taxId && Boolean(errors.taxId)}
-											helperText={touched.taxId && errors.taxId}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Manager ID')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="managerId"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.managerId && Boolean(errors.managerId)}
-											helperText={touched.managerId && errors.managerId}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Team Size')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="teamSize"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.teamSize && Boolean(errors.teamSize)}
-											helperText={touched.teamSize && errors.teamSize}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Specialization')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="specialization"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.specialization && Boolean(errors.specialization)}
-											helperText={touched.specialization && errors.specialization}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Contract Start Date')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											name="contractStartDate"
-											disabled={isTableMode === 'view'}
-										>
-											{({ field, form }: any) => (
-												<DatePicker
-													{...field}
-													disabled={isTableMode === 'view'}
-													slotProps={{
-														textField: {
-															fullWidth: true,
-															size: 'small',
-															error:
-																touched.contractStartDate &&
-																Boolean(errors.contractStartDate),
-															helperText:
-																touched.contractStartDate && errors.contractStartDate
-														}
-													}}
-													value={field.value ? new Date(field.value) : null}
-													onChange={(date) =>
-														form.setFieldValue(
-															'contractStartDate',
-															date ? date.toISOString() : ''
-														)
-													}
-												/>
-											)}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Contract End Date')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											name="contractEndDate"
-											disabled={isTableMode === 'view'}
-										>
-											{({ field, form }: any) => (
-												<DatePicker
-													{...field}
-													disabled={isTableMode === 'view'}
-													slotProps={{
-														textField: {
-															fullWidth: true,
-															size: 'small',
-															error:
-																touched.contractEndDate &&
-																Boolean(errors.contractEndDate),
-															helperText:
-																touched.contractEndDate && errors.contractEndDate
-														}
-													}}
-													value={field.value ? new Date(field.value) : null}
-													onChange={(date) =>
-														form.setFieldValue(
-															'contractEndDate',
-															date ? date.toISOString() : ''
-														)
-													}
-												/>
-											)}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Hourly Rate')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="hourlyRate"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.hourlyRate && Boolean(errors.hourlyRate)}
-											helperText={touched.hourlyRate && errors.hourlyRate}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Certifications')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="certifications"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.certifications && Boolean(errors.certifications)}
-											helperText={touched.certifications && errors.certifications}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Education Level')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="educationLevel"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.educationLevel && Boolean(errors.educationLevel)}
-											helperText={touched.educationLevel && errors.educationLevel}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('University')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="university"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.university && Boolean(errors.university)}
-											helperText={touched.university && errors.university}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Graduation Year')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="graduationYear"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.graduationYear && Boolean(errors.graduationYear)}
-											helperText={touched.graduationYear && errors.graduationYear}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Previous Experience Years')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="previousExperienceYears"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={
-												touched.previousExperienceYears &&
-												Boolean(errors.previousExperienceYears)
-											}
-											helperText={
-												touched.previousExperienceYears && errors.previousExperienceYears
-											}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Employment Status')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="employmentStatus"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.employmentStatus && Boolean(errors.employmentStatus)}
-											helperText={touched.employmentStatus && errors.employmentStatus}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>{t('Probation End Date')}</Typography>
-										<Field
-											name="probationEndDate"
-											disabled={isTableMode === 'view'}
-										>
-											{({ field, form }: any) => (
-												<DatePicker
-													{...field}
-													disabled={isTableMode === 'view'}
-													slotProps={{
-														textField: {
-															fullWidth: true,
-															size: 'small',
-															error:
-																touched.probationEndDate &&
-																Boolean(errors.probationEndDate),
-															helperText:
-																touched.probationEndDate && errors.probationEndDate
-														}
-													}}
-													value={field.value ? new Date(field.value) : null}
-													onChange={(date) =>
-														form.setFieldValue(
-															'probationEndDate',
-															date ? date.toISOString() : null
-														)
-													}
-												/>
-											)}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Shift Timings')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="shiftTimings"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.shiftTimings && Boolean(errors.shiftTimings)}
-											helperText={touched.shiftTimings && errors.shiftTimings}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Access Level')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="accessLevel"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.accessLevel && Boolean(errors.accessLevel)}
-											helperText={touched.accessLevel && errors.accessLevel}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Budget Authority')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="budgetAuthority"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.budgetAuthority && Boolean(errors.budgetAuthority)}
-											helperText={touched.budgetAuthority && errors.budgetAuthority}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Sales Target')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="salesTarget"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.salesTarget && Boolean(errors.salesTarget)}
-											helperText={touched.salesTarget && errors.salesTarget}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Commission Rate')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="commissionRate"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.commissionRate && Boolean(errors.commissionRate)}
-											helperText={touched.commissionRate && errors.commissionRate}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Intern Duration Months')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="internDurationMonths"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.internDurationMonths && Boolean(errors.internDurationMonths)}
-											helperText={touched.internDurationMonths && errors.internDurationMonths}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Mentor ID')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="mentorId"
-											component={TextFormField}
-											type="number"
-											fullWidth
-											size="small"
-											error={touched.mentorId && Boolean(errors.mentorId)}
-											helperText={touched.mentorId && errors.mentorId}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Office Location')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="officeLocation"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.officeLocation && Boolean(errors.officeLocation)}
-											helperText={touched.officeLocation && errors.officeLocation}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Work Mode')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											as="select"
-											name="workMode"
-											disabled={isTableMode === 'view'}
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.workMode && Boolean(errors.workMode)}
-											helperText={touched.workMode && errors.workMode}
-										>
-											<MenuItem
-												value=""
-												disabled
-											>
-												{t('Select Work Mode')}
-											</MenuItem>
-											{workModeOptions.map((option) => (
-												<MenuItem
-													key={option}
-													value={option}
-												>
-													{option}
-												</MenuItem>
-											))}
-										</Field>
-									</Grid>
-									<Grid
-										item
-										lg={4}
-										md={4}
-										sm={6}
-										xs={12}
-									>
-										<Typography>
-											{t('Notes')} <span className="text-red-500">*</span>
-										</Typography>
-										<Field
-											disabled={isTableMode === 'view'}
-											name="notes"
-											component={TextFormField}
-											fullWidth
-											size="small"
-											error={touched.notes && Boolean(errors.notes)}
-											helperText={touched.notes && errors.notes}
-										/>
-									</Grid>
-									<Grid
-										item
-										lg={12}
-										className="flex justify-end gap-2"
-									>
-										<Button
-											type="submit"
-											variant="contained"
-											disabled={isTableMode === 'view' || isDataLoading}
-											className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
-										>
-											{t('Save')}
-											{isDataLoading && (
-												<CircularProgress
-													size={24}
-													className="ml-2"
-												/>
-											)}
-										</Button>
-										<Button
-											variant="contained"
-											className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-gray-300 hover:bg-gray-300/80"
-											onClick={toggleModal}
-										>
-											{t('Cancel')}
-										</Button>
-									</Grid>
+		<Dialog
+			open={isOpen}
+			maxWidth="xl"
+			onClose={toggleModal}
+			PaperProps={{ style: { top: '40px', margin: 0, position: 'absolute' } }}
+		>
+			<DialogTitle>
+				<Typography variant="h6" color="textSecondary" fontWeight={400}>
+					{t('User Registration')}
+				</Typography>
+			</DialogTitle>
+			<DialogContent>
+				<Formik
+					initialValues={initialValues}
+					onSubmit={handleSubmit}
+					validationSchema={validationSchema}
+					enableReinitialize
+				>
+					{({ errors, touched }) => (
+						<Form>
+							<Grid container spacing={2}>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Employee Name')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="employee_name"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.employee_name && Boolean(errors.employee_name)}
+										helperText={touched.employee_name && errors.employee_name}
+									/>
 								</Grid>
-							</Form>
-						)}
-					</Formik>
-				</DialogContent>
-			</Dialog>
-		</LocalizationProvider>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Age')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="Age"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.Age && Boolean(errors.Age)}
+										helperText={touched.Age && errors.Age}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Business Travel')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="BusinessTravel"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.BusinessTravel && Boolean(errors.BusinessTravel)}
+										helperText={touched.BusinessTravel && errors.BusinessTravel}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Daily Rate')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="DailyRate"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.DailyRate && Boolean(errors.DailyRate)}
+										helperText={touched.DailyRate && errors.DailyRate}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Department')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="Department"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.Department && Boolean(errors.Department)}
+										helperText={touched.Department && errors.Department}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Distance From Home')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="DistanceFromHome"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.DistanceFromHome && Boolean(errors.DistanceFromHome)}
+										helperText={touched.DistanceFromHome && errors.DistanceFromHome}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Education')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										as="select"
+										name="Education"
+										disabled={isTableMode === 'view'}
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.Education && Boolean(errors.Education)}
+										helperText={touched.Education && errors.Education}
+									>
+										<MenuItem value="" disabled>
+											{t('Select Education')}
+										</MenuItem>
+										{educationOptions.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{option.label}
+											</MenuItem>
+										))}
+									</Field>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Education Field')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="EducationField"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.EducationField && Boolean(errors.EducationField)}
+										helperText={touched.EducationField && errors.EducationField}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Environment Satisfaction')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										as="select"
+										name="EnvironmentSatisfaction"
+										disabled={isTableMode === 'view'}
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.EnvironmentSatisfaction && Boolean(errors.EnvironmentSatisfaction)}
+										helperText={touched.EnvironmentSatisfaction && errors.EnvironmentSatisfaction}
+									>
+										<MenuItem value="" disabled>
+											{t('Select Environment Satisfaction')}
+										</MenuItem>
+										{environmentSatisfactionOptions.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{option.label}
+											</MenuItem>
+										))}
+									</Field>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Gender')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="Gender"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.Gender && Boolean(errors.Gender)}
+										helperText={touched.Gender && errors.Gender}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Hourly Rate')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="HourlyRate"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.HourlyRate && Boolean(errors.HourlyRate)}
+										helperText={touched.HourlyRate && errors.HourlyRate}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Job Involvement')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										as="select"
+										name="JobInvolvement"
+										disabled={isTableMode === 'view'}
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.JobInvolvement && Boolean(errors.JobInvolvement)}
+										helperText={touched.JobInvolvement && errors.JobInvolvement}
+									>
+										<MenuItem value="" disabled>
+											{t('Select Job Involvement')}
+										</MenuItem>
+										{jobInvolvementOptions.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{option.label}
+											</MenuItem>
+										))}
+									</Field>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Job Level')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="JobLevel"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.JobLevel && Boolean(errors.JobLevel)}
+										helperText={touched.JobLevel && errors.JobLevel}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Job Role')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="JobRole"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.JobRole && Boolean(errors.JobRole)}
+										helperText={touched.JobRole && errors.JobRole}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Job Satisfaction')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										as="select"
+										name="JobSatisfaction"
+										disabled={isTableMode === 'view'}
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.JobSatisfaction && Boolean(errors.JobSatisfaction)}
+										helperText={touched.JobSatisfaction && errors.JobSatisfaction}
+									>
+										<MenuItem value="" disabled>
+											{t('Select Job Satisfaction')}
+										</MenuItem>
+										{jobSatisfactionOptions.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{option.label}
+											</MenuItem>
+										))}
+									</Field>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Marital Status')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="MaritalStatus"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.MaritalStatus && Boolean(errors.MaritalStatus)}
+										helperText={touched.MaritalStatus && errors.MaritalStatus}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Monthly Income')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="MonthlyIncome"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.MonthlyIncome && Boolean(errors.MonthlyIncome)}
+										helperText={touched.MonthlyIncome && errors.MonthlyIncome}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Monthly Rate')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="MonthlyRate"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.MonthlyRate && Boolean(errors.MonthlyRate)}
+										helperText={touched.MonthlyRate && errors.MonthlyRate}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Num Companies Worked')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="NumCompaniesWorked"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.NumCompaniesWorked && Boolean(errors.NumCompaniesWorked)}
+										helperText={touched.NumCompaniesWorked && errors.NumCompaniesWorked}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Over Time')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="OverTime"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.OverTime && Boolean(errors.OverTime)}
+										helperText={touched.OverTime && errors.OverTime}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Relationship Satisfaction')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										as="select"
+										name="RelationshipSatisfaction"
+										disabled={isTableMode === 'view'}
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.RelationshipSatisfaction && Boolean(errors.RelationshipSatisfaction)}
+										helperText={touched.RelationshipSatisfaction && errors.RelationshipSatisfaction}
+									>
+										<MenuItem value="" disabled>
+											{t('Select Relationship Satisfaction')}
+										</MenuItem>
+										{relationshipSatisfactionOptions.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{option.label}
+											</MenuItem>
+										))}
+									</Field>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Stock Option Level')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="StockOptionLevel"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.StockOptionLevel && Boolean(errors.StockOptionLevel)}
+										helperText={touched.StockOptionLevel && errors.StockOptionLevel}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Total Working Years')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="TotalWorkingYears"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.TotalWorkingYears && Boolean(errors.TotalWorkingYears)}
+										helperText={touched.TotalWorkingYears && errors.TotalWorkingYears}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Training Times Last Year')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="TrainingTimesLastYear"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.TrainingTimesLastYear && Boolean(errors.TrainingTimesLastYear)}
+										helperText={touched.TrainingTimesLastYear && errors.TrainingTimesLastYear}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Work Life Balance')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										as="select"
+										name="WorkLifeBalance"
+										disabled={isTableMode === 'view'}
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.WorkLifeBalance && Boolean(errors.WorkLifeBalance)}
+										helperText={touched.WorkLifeBalance && errors.WorkLifeBalance}
+									>
+										<MenuItem value="" disabled>
+											{t('Select Work Life Balance')}
+										</MenuItem>
+										{workLifeBalanceOptions.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{option.label}
+											</MenuItem>
+										))}
+									</Field>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Years At Company')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="YearsAtCompany"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.YearsAtCompany && Boolean(errors.YearsAtCompany)}
+										helperText={touched.YearsAtCompany && errors.YearsAtCompany}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Years In Current Role')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="YearsInCurrentRole"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.YearsInCurrentRole && Boolean(errors.YearsInCurrentRole)}
+										helperText={touched.YearsInCurrentRole && errors.YearsInCurrentRole}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Years Since Last Promotion')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="YearsSinceLastPromotion"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.YearsSinceLastPromotion && Boolean(errors.YearsSinceLastPromotion)}
+										helperText={touched.YearsSinceLastPromotion && errors.YearsSinceLastPromotion}
+									/>
+								</Grid>
+								<Grid item lg={4} md={4} sm={6} xs={12}>
+									<Typography>
+										{t('Years With Curr Manager')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										disabled={isTableMode === 'view'}
+										name="YearsWithCurrManager"
+										type="number"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										error={touched.YearsWithCurrManager && Boolean(errors.YearsWithCurrManager)}
+										helperText={touched.YearsWithCurrManager && errors.YearsWithCurrManager}
+									/>
+								</Grid>
+								<Grid item lg={12} className="flex justify-end gap-2">
+									<Button
+										type="submit"
+										variant="contained"
+										disabled={isTableMode === 'view' || isDataLoading}
+										className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
+									>
+										{t('Save')}
+										{isDataLoading && (
+											<CircularProgress
+												size={24}
+												className="ml-2"
+											/>
+										)}
+									</Button>
+									<Button
+										variant="contained"
+										className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-gray-300 hover:bg-gray-300/80"
+										onClick={toggleModal}
+									>
+										{t('Cancel')}
+									</Button>
+								</Grid>
+							</Grid>
+						</Form>
+					)}
+				</Formik>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

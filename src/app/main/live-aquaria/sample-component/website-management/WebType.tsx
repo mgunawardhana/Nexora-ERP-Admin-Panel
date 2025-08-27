@@ -187,7 +187,7 @@ function WebType() {
 
 	return (
 		<div className="min-w-full max-w-[100vw]">
-			<NavigationViewComp title="User Management" />
+			<NavigationViewComp title=" Management" />
 
 			<Formik
 				initialValues={{}}

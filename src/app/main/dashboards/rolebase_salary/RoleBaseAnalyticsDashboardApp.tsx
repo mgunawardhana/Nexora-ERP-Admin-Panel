@@ -84,7 +84,7 @@ function StackedBarChart({ data, title = 'Role Distribution by Office Location' 
 						stacked: true,
 						title: {
 							display: true,
-							text: 'Office Location'
+							text: 'Department'
 						}
 					},
 					y: {
@@ -166,12 +166,11 @@ function RoleBaseAnalyticsDashboardApp() {
 							variant="h6"
 							gutterBottom
 						>
-							Employee Role Distribution
 						</Typography>
 						{employeeData ? (
 							<StackedBarChart
 								data={employeeData}
-								title="Employee Roles by Office Location"
+								title="Employee Roles by Department Wise"
 							/>
 						) : (
 							<Box

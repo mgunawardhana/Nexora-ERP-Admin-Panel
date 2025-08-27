@@ -164,7 +164,6 @@ function AnalyticsDashboardApp() {
 							variant="h6"
 							gutterBottom
 						>
-							Employee Role Distribution
 						</Typography>
 						{employeeData ? (
 							<HorizontalBarChart

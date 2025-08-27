@@ -383,7 +383,7 @@ function Category(): JSX.Element {
 
 	return (
 		<div className="min-w-full max-w-[100vw]">
-			<NavigationViewComp title={t('stock management / categories')} />
+			<NavigationViewComp title={t('employee / registrations')} />
 
 			<Formik
 				initialValues={{ user: '', status: '' }}

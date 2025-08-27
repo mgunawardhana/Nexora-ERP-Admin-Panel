@@ -1,6 +1,5 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { Button, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -14,15 +13,15 @@ import ShippingTypeDeleteAlertForm from './components/ShippingTypeDeleteAlertFor
 import { fetchAllUsersByPagination } from '../../../../axios/services/mega-city-services/user-management-service/UserService';
 import { deleteWebArticle } from '../../../../axios/services/mega-city-services/web-article/WebArticleService';
 
-// Define the User interface based on your API response
+// Define the User interface based on the requested fields
 interface User {
-	nationalId: string;
+	userId: number;
+	employeeName: string;
+	educationField: string;
+	maritalStatus: string;
 	email: string;
-	department: string;
-	designation: string;
-	hr_approved: boolean;
-	finance_approved: boolean;
-	admin_approved: boolean;
+	monthlyRate: number;
+	gender: string;
 }
 
 function WebType() {
@@ -66,69 +65,38 @@ function WebType() {
 
 	const tableColumns = [
 		{
-			title: t('National Id'),
-			field: 'nationalId'
+			title: t('Employee ID'),
+			field: 'userId',
+		},
+		{
+			title: t('Employee Name'),
+			field: 'employeeName',
+		},
+		{
+			title: t('Education Field'),
+			field: 'educationField',
+		},
+		{
+			title: t('Marital Status'),
+			field: 'maritalStatus',
 		},
 		{
 			title: t('Email'),
-			field: 'email'
+			field: 'email',
 		},
 		{
-			title: t('Department'),
-			field: 'department'
-		},
-		{
-			title: t('Designation'),
-			field: 'designation'
-		},
-		{
-			title: t('HR Approved'),
-			field: 'hr_approved',
+			title: t('Monthly Rate'),
+			field: 'monthlyRate',
 			render: (rowData: User) => (
-				<span
-					style={{
-						color: rowData.hr_approved ? '#4CAF50' : '#F44336',
-						backgroundColor: rowData.hr_approved ? '#E8F5E9' : '#FFEBEE',
-						padding: '4px 12px',
-						borderRadius: '16px'
-					}}
-				>
-					{rowData.hr_approved ? t('Approved') : t('Pending')}
-				</span>
-			)
+				<span>
+          ${rowData.monthlyRate.toFixed(2)}
+        </span>
+			),
 		},
 		{
-			title: t('Finance Approved'),
-			field: 'finance_approved',
-			render: (rowData: User) => (
-				<span
-					style={{
-						color: rowData.finance_approved ? '#4CAF50' : '#F44336',
-						backgroundColor: rowData.finance_approved ? '#E8F5E9' : '#FFEBEE',
-						padding: '4px 12px',
-						borderRadius: '16px'
-					}}
-				>
-					{rowData.finance_approved ? t('Approved') : t('Pending')}
-				</span>
-			)
+			title: t('Gender'),
+			field: 'gender',
 		},
-		{
-			title: t('Admin Approved'),
-			field: 'admin_approved',
-			render: (rowData: User) => (
-				<span
-					style={{
-						color: rowData.admin_approved ? '#4CAF50' : '#F44336',
-						backgroundColor: rowData.admin_approved ? '#E8F5E9' : '#FFEBEE',
-						padding: '4px 12px',
-						borderRadius: '16px'
-					}}
-				>
-					{rowData.admin_approved ? t('Approved') : t('Pending')}
-				</span>
-			)
-		}
 	];
 
 	const handleConfirmStatusChange = async () => {
@@ -136,7 +104,7 @@ function WebType() {
 		const id = selectedActiveRowData?.id ?? null;
 		try {
 			const data = {
-				is_active: !selectedActiveRowData?.active
+				is_active: !selectedActiveRowData?.active,
 			};
 			// This function seems to be missing from your services, you might need to implement it
 			// await updateSomeStatus(id, data);
@@ -152,15 +120,17 @@ function WebType() {
 		try {
 			const response = await fetchAllUsersByPagination(pageNo, pageSize);
 
+			console.log('Fetched users:', response);
+
 			if (response && response.result && Array.isArray(response.result.content)) {
 				const transformedData: User[] = response.result.content.map((item: any) => ({
-					nationalId: item.nationalId,
+					employeeName: item.employeeName,
+					educationField: item.educationField,
+					maritalStatus: item.maritalStatus,
 					email: item.email,
-					department: item.department,
-					designation: item.designation,
-					hr_approved: item.hr_approved,
-					finance_approved: item.finance_approved,
-					admin_approved: item.admin_approved
+					monthlyRate: item.monthlyRate,
+					gender: item.gender,
+					userId: item.userId,
 				}));
 				setSampleData(transformedData);
 				setCount(response.result.totalElements);
@@ -185,8 +155,8 @@ function WebType() {
 	const handleAlertForm = async () => {
 		toggleDeleteModal();
 		try {
-			// Assuming nationalId is the unique identifier for deletion
-			await deleteWebArticle(selectedDeleteRowData?.nationalId);
+			// Assuming email is the unique identifier for deletion
+			await deleteWebArticle(selectedDeleteRowData?.email);
 			await fetchAllUsers();
 			toast.success('User deleted successfully');
 		} catch (e) {
@@ -221,31 +191,32 @@ function WebType() {
 			>
 				{({ values }) => (
 					<Form>
-						<Grid
-							container
-							spacing={2}
-							className="pt-[10px] pr-[30px] mx-auto"
-						>
-							<Grid
-								item
-								xs={12}
-								sm={6}
-								md={12}
-								lg={3}
-								xl={6}
-								className="flex justify-end items-center gap-[10px] pt-[5px!important]"
-							>
-								<Button
-									className="min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-white font-500 py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
-									type="button"
-									variant="contained"
-									size="medium"
-									onClick={handleNewShippingType}
-								>
-									{t('Create User')}
-								</Button>
-							</Grid>
-						</Grid>
+						{/* Commented out button section as in original */}
+						{/* <Grid
+              container
+              spacing={2}
+              className="pt-[10px] pr-[30px] mx-auto"
+            >
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={12}
+                lg={3}
+                xl={6}
+                className="flex justify-end items-center gap-[10px] pt-[5px!important]"
+              >
+                <Button
+                  className="min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-white font-500 py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
+                  type="button"
+                  variant="contained"
+                  size="medium"
+                  onClick={handleNewShippingType}
+                >
+                  {t('Create User')}
+                </Button>
+              </Grid>
+            </Grid> */}
 					</Form>
 				)}
 			</Formik>
@@ -263,7 +234,7 @@ function WebType() {
 					className="pt-[5px!important]"
 				>
 					<MaterialTableWrapper
-						title="User  Table"
+						title="User Table"
 						tableColumns={tableColumns}
 						handlePageChange={handlePageChange}
 						handlePageSizeChange={handlePageSizeChange}
@@ -281,7 +252,6 @@ function WebType() {
 				</Grid>
 			</Grid>
 
-			{/* Modals */}
 			{isOpenNewShippingTypeModal && (
 				<NewShippingTypeModel
 					isOpen={isOpenNewShippingTypeModal}
