@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
 	Box,
 	Button,
@@ -8,16 +7,16 @@ import {
 	DialogTitle,
 	Divider,
 	Grid,
-	MenuItem,
 	Paper,
 	Typography
 } from '@mui/material';
+import emailjs from '@emailjs/browser';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-// Make sure this path is correct for your project structure
 import TextFormField from '../../../../../common/FormComponents/FormTextField';
+import { getPrediction } from '../../../../../axios/services/mega-city-services/common/CommonService';
 
 // --- INTERFACES ---
 
@@ -29,57 +28,31 @@ interface PredictionData {
 
 interface ApiResponse {
 	status: string;
-	prediction: PredictionData;
-	employee_name: string;
+	prediction: PredictionData | null;
+	employee_name: string | null;
 }
 
 interface UserData {
 	nationalId: string;
-	email: string;
-	department: string;
-	designation: string;
-	hr_approved: boolean;
-	finance_approved: boolean;
-	admin_approved: boolean;
+	userId?: number;
+	employeeName?: string;
+	gender?: string;
+	monthlyRate?: number;
+	overTime?: string;
+	yearsAtCompany?: number;
+	yearsSinceLastPromotion?: number;
+	email?: string;
 }
 
 interface Props {
 	toggleModal?: () => void;
 	isOpen?: boolean;
 	clickedRowData?: UserData;
-	predictionData?: ApiResponse;
 	fetchAllUsers?: () => void;
+	isEditMode?: boolean;
 }
 
-// --- MOCK DATA FOR TESTING ---
-
-const mockClickedRowData_Default = {
-	nationalId: '199012345678',
-	email: 'jane.doe@example.com',
-	department: 'Technology',
-	designation: 'Senior Software Engineer',
-	hr_approved: true,
-	finance_approved: false,
-	admin_approved: false
-};
-
-const mockPredictionData_Default = {
-	status: 'success',
-	prediction: {
-		performance_rating: 3,
-		confidence: 0.78,
-		suggestions: 'Meets expectations. Encourage continued growth via feedback and development opportunities.'
-	},
-	employee_name: 'Jane Doe'
-};
-
 // --- HELPER FUNCTIONS & CONSTANTS ---
-
-const mapBooleanToStatus = (status: boolean): string => {
-	if (status) return 'Approved';
-
-	return 'Pending';
-};
 
 const meterSegments = [
 	{ label: 'Very Low', color: '#f44336', minValue: 0 },
@@ -92,16 +65,46 @@ const meterSegments = [
 // --- MAIN COMPONENT ---
 
 function UpdateUserStatusModal({
-	isOpen = true, // Default to true for easy testing
+	isOpen = true,
 	toggleModal = () => console.log('Close modal clicked'),
-	clickedRowData = mockClickedRowData_Default,
-	predictionData = mockPredictionData_Default,
-	fetchAllUsers
+	clickedRowData,
+	fetchAllUsers,
+	isEditMode = false
 }: Props) {
 	const { t } = useTranslation('userManagement');
 	const [isDataLoading, setDataLoading] = useState(false);
+	const [isLlmLoading, setLlmLoading] = useState(false);
+	const [isNotifying, setIsNotifying] = useState(false);
+	const [predictionData, setPredictionData] = useState<ApiResponse | null>(null);
 
-	const approvalStatusOptions = ['Approved', 'Rejected', 'On Hold', 'Pending'];
+	useEffect(() => {
+		const fetchPredictionData = async () => {
+			if (clickedRowData?.userId) {
+				setDataLoading(true);
+				try {
+					const response = await getPrediction(String(clickedRowData.userId));
+
+					if (response.result && response.result.status !== 'error') {
+						setPredictionData(response.result);
+					} else {
+						setPredictionData(null);
+						toast.error(response.result?.status || 'Failed to fetch prediction data.');
+					}
+				} catch (error) {
+					setPredictionData(null);
+					toast.error('An unexpected error occurred.');
+				} finally {
+					setDataLoading(false);
+				}
+			}
+		};
+
+		if (isOpen) {
+			fetchPredictionData();
+		} else {
+			setPredictionData(null);
+		}
+	}, [isOpen, clickedRowData]);
 
 	// --- METER LOGIC ---
 	const confidence = predictionData?.prediction?.confidence || 0;
@@ -113,33 +116,84 @@ function UpdateUserStatusModal({
 			.find((s) => clampedConfidence >= s.minValue) || meterSegments[0];
 	const pointerPosition = `${clampedConfidence * 100}%`;
 
-	const handleUpdateUser = async (values: {
-		hr_approved: string;
-		finance_approved: string;
-		admin_approved: string;
-	}) => {
-		setDataLoading(true);
-		const payload = {
-			nationalId: clickedRowData.nationalId,
-			hr_approved: values.hr_approved === 'Approved',
-			finance_approved: values.finance_approved === 'Approved',
-			admin_approved: values.admin_approved === 'Approved'
+	const handleUpdateUser = async () => {
+		if (fetchAllUsers) {
+			fetchAllUsers();
+		}
+
+		toggleModal();
+		toast.success('User status action confirmed!');
+	};
+
+	const handleLlmGetAndSave = async () => {
+		if (!clickedRowData?.userId) {
+			toast.warn('User ID is missing. Cannot proceed.');
+			return;
+		}
+
+		setLlmLoading(true);
+		try {
+			const response = await getLlmPrediction(String(clickedRowData.userId));
+
+			if (response.result && response.result.status !== 'error') {
+				setPredictionData(response.result);
+				toast.success('Enhanced prediction received!');
+
+				if (fetchAllUsers) {
+					await fetchAllUsers();
+				}
+
+				toggleModal();
+			} else {
+				toast.error(response.result?.status || 'Failed to get an enhanced prediction.');
+			}
+		} catch (error) {
+			toast.error('An unexpected error occurred while contacting the AI.');
+		} finally {
+			setLlmLoading(false);
+		}
+	};
+
+	// --- MODIFIED: Handler for sending welcome email via EmailJS ---
+	const handleNotifyUser = async () => {
+		if (!clickedRowData?.email) {
+			toast.warn('Employee email is missing. Cannot send notification.');
+			return;
+		}
+
+		setIsNotifying(true);
+
+		// Replace these with your actual EmailJS credentials
+		const serviceID = 'service_oxr5toy';
+		const templateID = 'template_cx24pet';
+		const publicKey = 'CImQqVmdDtxFUAGD9';
+
+		const templateParams = {
+			employee_name: clickedRowData?.employeeName || 'Valued Employee',
+			employee_email: clickedRowData?.email,
+			decision: predictionData?.status || 'review',
+			suggestion: predictionData?.prediction?.suggestions || 'No specific suggestions at this time.',
+			company_name: 'Nexora Systems',
+			message: `Dear ${clickedRowData?.employeeName || 'Valued Employee'},
+
+Welcome to ${'Nexora Systems'}! Our automated machine learning model has evaluated your performance, and based on the analysis, our system suggests the following decision: ${predictionData?.status || 'review'}.
+
+Suggestions for improvement: ${predictionData?.prediction?.suggestions || 'No specific suggestions at this time.'}
+
+We are excited to have you as part of our team and look forward to your contributions!
+
+Best regards,
+The ${'Nexora Systems'} Team`
 		};
 
 		try {
-			console.log('Submitting data:', payload);
-			// Your API call would go here, e.g., await updateUserStatus(payload);
-			toast.success('User statuses updated successfully!');
-
-			if (fetchAllUsers) {
-				fetchAllUsers();
-			}
-
-			toggleModal();
+			await emailjs.send(serviceID, templateID, templateParams, publicKey);
+			toast.success('Welcome email sent successfully!');
 		} catch (error) {
-			toast.error('Failed to update user statuses.');
+			console.error('EmailJS Error:', error);
+			toast.error('Failed to send welcome email.');
 		} finally {
-			setDataLoading(false);
+			setIsNotifying(false);
 		}
 	};
 
@@ -154,7 +208,6 @@ function UpdateUserStatusModal({
 				<Typography variant="h6">{t('Update User Status & View Prediction')}</Typography>
 			</DialogTitle>
 			<DialogContent>
-				{/* --- PREDICTION SECTION --- */}
 				<Typography
 					variant="subtitle1"
 					gutterBottom
@@ -172,68 +225,82 @@ function UpdateUserStatusModal({
 						xs={12}
 						md={7}
 					>
-						<Box sx={{ width: '100%', fontFamily: 'sans-serif' }}>
-							<Box sx={{ position: 'relative', height: '25px', mb: 0.5 }}>
+						{isDataLoading ? (
+							<Box
+								sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+							>
+								<CircularProgress />
+							</Box>
+						) : predictionData ? (
+							<Box sx={{ width: '100%', fontFamily: 'sans-serif' }}>
+								<Box sx={{ position: 'relative', height: '25px', mb: 0.5 }}>
+									<Box
+										sx={{
+											position: 'absolute',
+											left: pointerPosition,
+											transform: 'translateX(-50%)',
+											textAlign: 'center'
+										}}
+									>
+										<Typography
+											variant="caption"
+											sx={{
+												fontWeight: 'bold',
+												color: activeSegment.color,
+												bgcolor: 'background.paper',
+												px: 0.5,
+												borderRadius: 1
+											}}
+										>
+											{(clampedConfidence * 100).toFixed(1)}%
+										</Typography>
+										<Box
+											sx={{
+												width: 0,
+												height: 0,
+												borderLeft: '6px solid transparent',
+												borderRight: '6px solid transparent',
+												borderTop: `6px solid ${activeSegment.color}`,
+												margin: 'auto'
+											}}
+										/>
+									</Box>
+								</Box>
 								<Box
 									sx={{
-										position: 'absolute',
-										left: pointerPosition,
-										transform: 'translateX(-50%)',
-										textAlign: 'center'
+										display: 'flex',
+										width: '100%',
+										height: '20px',
+										borderRadius: '4px',
+										overflow: 'hidden'
 									}}
 								>
-									<Typography
-										variant="caption"
-										sx={{
-											fontWeight: 'bold',
-											color: activeSegment.color,
-											bgcolor: 'background.paper',
-											px: 0.5,
-											borderRadius: 1
-										}}
-									>
-										{(clampedConfidence * 100).toFixed(1)}%
-									</Typography>
-									<Box
-										sx={{
-											width: 0,
-											height: 0,
-											borderLeft: '6px solid transparent',
-											borderRight: '6px solid transparent',
-											borderTop: `6px solid ${activeSegment.color}`,
-											margin: 'auto'
-										}}
-									/>
+									{meterSegments.map((segment) => (
+										<Box
+											key={segment.label}
+											sx={{ flex: 1, backgroundColor: segment.color }}
+										/>
+									))}
+								</Box>
+								<Box sx={{ display: 'flex', width: '100%', mt: 0.5 }}>
+									{meterSegments.map((segment) => (
+										<Typography
+											key={segment.label}
+											variant="caption"
+											sx={{ flex: 1, textAlign: 'center', fontSize: '0.65rem' }}
+										>
+											{segment.label}
+										</Typography>
+									))}
 								</Box>
 							</Box>
+						) : (
 							<Box
-								sx={{
-									display: 'flex',
-									width: '100%',
-									height: '20px',
-									borderRadius: '4px',
-									overflow: 'hidden'
-								}}
+								sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
 							>
-								{meterSegments.map((segment) => (
-									<Box
-										key={segment.label}
-										sx={{ flex: 1, backgroundColor: segment.color }}
-									/>
-								))}
+								<Typography>No prediction data available.</Typography>
 							</Box>
-							<Box sx={{ display: 'flex', width: '100%', mt: 0.5 }}>
-								{meterSegments.map((segment) => (
-									<Typography
-										key={segment.label}
-										variant="caption"
-										sx={{ flex: 1, textAlign: 'center', fontSize: '0.65rem' }}
-									>
-										{segment.label}
-									</Typography>
-								))}
-							</Box>
-						</Box>
+						)}
 					</Grid>
 					<Grid
 						item
@@ -253,7 +320,7 @@ function UpdateUserStatusModal({
 									component="span"
 									sx={{ fontWeight: 'normal' }}
 								>
-									{predictionData.employee_name}
+									{predictionData?.employee_name || clickedRowData?.employeeName || 'N/A'}
 								</Box>
 							</Typography>
 							<Typography
@@ -265,7 +332,7 @@ function UpdateUserStatusModal({
 									component="span"
 									sx={{ fontWeight: 'normal' }}
 								>
-									{predictionData.prediction.suggestions}
+									{predictionData?.prediction?.suggestions || 'N/A'}
 								</Box>
 							</Typography>
 						</Paper>
@@ -274,13 +341,8 @@ function UpdateUserStatusModal({
 
 				<Divider sx={{ my: 2 }} />
 
-				{/* --- APPROVAL FORM SECTION --- */}
 				<Formik
-					initialValues={{
-						hr_approved: mapBooleanToStatus(clickedRowData.hr_approved),
-						finance_approved: mapBooleanToStatus(clickedRowData.finance_approved),
-						admin_approved: mapBooleanToStatus(clickedRowData.admin_approved)
-					}}
+					initialValues={{}}
 					onSubmit={handleUpdateUser}
 					enableReinitialize
 				>
@@ -291,23 +353,22 @@ function UpdateUserStatusModal({
 								gutterBottom
 								sx={{ fontWeight: 'bold' }}
 							>
-								User Approval Status
+								User Details
 							</Typography>
 							<Grid
 								container
 								spacing={2}
 							>
-								{/* Fields omitted for brevity but are the same as before */}
 								<Grid
 									item
 									xs={12}
 									sm={6}
 								>
-									<Typography gutterBottom>{t('National ID')}</Typography>
+									<Typography gutterBottom>{t('Employee ID')}</Typography>
 									<Field
-										name="nationalId"
+										name="employeeId"
 										component={TextFormField}
-										value={clickedRowData.nationalId || ''}
+										value={`EMPID-00${clickedRowData?.userId || ''}`}
 										fullWidth
 										size="small"
 										disabled
@@ -318,11 +379,11 @@ function UpdateUserStatusModal({
 									xs={12}
 									sm={6}
 								>
-									<Typography gutterBottom>{t('Email')}</Typography>
+									<Typography gutterBottom>{t('Employee Name')}</Typography>
 									<Field
-										name="email"
+										name="employeeName"
 										component={TextFormField}
-										value={clickedRowData.email || ''}
+										value={clickedRowData?.employeeName || 'N/A'}
 										fullWidth
 										size="small"
 										disabled
@@ -333,11 +394,11 @@ function UpdateUserStatusModal({
 									xs={12}
 									sm={6}
 								>
-									<Typography gutterBottom>{t('Department')}</Typography>
+									<Typography gutterBottom>{t('Gender')}</Typography>
 									<Field
-										name="department"
+										name="gender"
 										component={TextFormField}
-										value={clickedRowData.department || ''}
+										value={clickedRowData?.gender || 'N/A'}
 										fullWidth
 										size="small"
 										disabled
@@ -348,113 +409,136 @@ function UpdateUserStatusModal({
 									xs={12}
 									sm={6}
 								>
-									<Typography gutterBottom>{t('Designation')}</Typography>
+									<Typography gutterBottom>{t('Monthly Rate')}</Typography>
 									<Field
-										name="designation"
+										name="monthlyRate"
 										component={TextFormField}
-										value={clickedRowData.designation || ''}
+										value={clickedRowData?.monthlyRate || 'N/A'}
+										fullWidth
+										size="small"
+										disabled
+									/>
+								</Grid>
+								<Grid
+									item
+									xs={12}
+									sm={6}
+								>
+									<Typography gutterBottom>{t('Overtime')}</Typography>
+									<Field
+										name="overTime"
+										component={TextFormField}
+										value={clickedRowData?.overTime || 'N/A'}
+										fullWidth
+										size="small"
+										disabled
+									/>
+								</Grid>
+								<Grid
+									item
+									xs={12}
+									sm={6}
+								>
+									<Typography gutterBottom>{t('Years at Company')}</Typography>
+									<Field
+										name="yearsAtCompany"
+										component={TextFormField}
+										value={clickedRowData?.yearsAtCompany || 'N/A'}
+										fullWidth
+										size="small"
+										disabled
+									/>
+								</Grid>
+								<Grid
+									item
+									xs={12}
+									sm={6}
+								>
+									<Typography gutterBottom>{t('Years Since Last Promotion')}</Typography>
+									<Field
+										name="yearsSinceLastPromotion"
+										component={TextFormField}
+										value={clickedRowData?.yearsSinceLastPromotion || 'N/A'}
+										fullWidth
+										size="small"
+										disabled
+									/>
+								</Grid>
+								<Grid
+									item
+									xs={12}
+									sm={6}
+								>
+									<Typography gutterBottom>{t('Current Status')}</Typography>
+									<Field
+										name="status"
+										component={TextFormField}
+										value={predictionData?.status || 'N/A'}
 										fullWidth
 										size="small"
 										disabled
 									/>
 								</Grid>
 
-								<Grid
-									item
-									xs={12}
-									sm={4}
-								>
-									<Typography gutterBottom>{t('HR Approved')}</Typography>
-									<Field
-										name="hr_approved"
-										component={TextFormField}
-										fullWidth
-										size="small"
-										select
-									>
-										{approvalStatusOptions.map((o) => (
-											<MenuItem
-												key={o}
-												value={o}
-											>
-												{o}
-											</MenuItem>
-										))}
-									</Field>
-								</Grid>
-								<Grid
-									item
-									xs={12}
-									sm={4}
-								>
-									<Typography gutterBottom>{t('Finance Approved')}</Typography>
-									<Field
-										name="finance_approved"
-										component={TextFormField}
-										fullWidth
-										size="small"
-										select
-									>
-										{approvalStatusOptions.map((o) => (
-											<MenuItem
-												key={o}
-												value={o}
-											>
-												{o}
-											</MenuItem>
-										))}
-									</Field>
-								</Grid>
-								<Grid
-									item
-									xs={12}
-									sm={4}
-								>
-									<Typography gutterBottom>{t('Admin Approved')}</Typography>
-									<Field
-										name="admin_approved"
-										component={TextFormField}
-										fullWidth
-										size="small"
-										select
-									>
-										{approvalStatusOptions.map((o) => (
-											<MenuItem
-												key={o}
-												value={o}
-											>
-												{o}
-											</MenuItem>
-										))}
-									</Field>
-								</Grid>
-
-								{/* Action Buttons */}
 								<Grid
 									item
 									xs={12}
 									sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}
 								>
 									<Button
-										variant="outlined"
+										className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-red hover:bg-red/80"
 										color="secondary"
 										onClick={toggleModal}
+										disabled={isLlmLoading || isNotifying}
 									>
 										{t('Cancel')}
 									</Button>
+
 									<Button
+										variant="contained"
+										className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] border-l-green-800 hover:border-l-green-800/80"
+										color="success"
+										onClick={handleNotifyUser}
+										disabled={
+											isDataLoading || isLlmLoading || isNotifying || !clickedRowData?.email
+										}
+										startIcon={
+											isNotifying ? (
+												<CircularProgress
+													size={20}
+													color="inherit"
+												/>
+											) : null
+										}
+									>
+										{isNotifying ? 'Notifying...' : 'Notify to User'}
+									</Button>
+
+									<Button
+										className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-blue-gray-800 hover:bg-blue-gray-800/80"
+										variant="contained"
+										color="info"
+										onClick={handleLlmGetAndSave}
+										startIcon={
+											isLlmLoading ? (
+												<CircularProgress
+													size={20}
+													color="inherit"
+												/>
+											) : null
+										}
+									>
+										{isLlmLoading ? 'Processing...' : 'Call LLM & Save'}
+									</Button>
+
+									<Button
+										className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-blue-700 hover:bg-blue-700/80"
 										type="submit"
 										variant="contained"
 										color="primary"
-										disabled={isDataLoading}
+										disabled={isDataLoading || isLlmLoading || isNotifying}
 									>
-										{t('Update')}
-										{isDataLoading && (
-											<CircularProgress
-												size={20}
-												sx={{ ml: 1 }}
-											/>
-										)}
+										{t('OK')}
 									</Button>
 								</Grid>
 							</Grid>

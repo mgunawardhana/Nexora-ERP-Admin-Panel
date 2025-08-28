@@ -37,3 +37,4 @@ export const STATUS_BY_ROLE_FOR_ANALYTICS = 'api/v1/analytics/role-by-employment
 export const GEMINI_API_CALL = 'api/gemini/generate';
 
 export const GET_ALL_SUGGESTIONS = 'api/v1/suggestions/get-all-suggestions?';
+export const FETCH_PREDICTION = 'api/v1/model/predict/';
