@@ -22,6 +22,8 @@ interface User {
 	email: string;
 	monthlyRate: number;
 	gender: string;
+	overTime: string;
+	yearsAtCompany: number;
 }
 
 function WebType() {
@@ -67,36 +69,34 @@ function WebType() {
 		{
 			title: t('Employee ID'),
 			field: 'userId',
+			cellStyle: { padding: '6px 8px' },
+			render: (rowData: User) => `EMPID-00${rowData.userId}`
 		},
 		{
 			title: t('Employee Name'),
-			field: 'employeeName',
-		},
-		{
-			title: t('Education Field'),
-			field: 'educationField',
-		},
-		{
-			title: t('Marital Status'),
-			field: 'maritalStatus',
-		},
-		{
-			title: t('Email'),
-			field: 'email',
+			field: 'employeeName'
 		},
 		{
 			title: t('Monthly Rate'),
 			field: 'monthlyRate',
-			render: (rowData: User) => (
-				<span>
-          ${rowData.monthlyRate.toFixed(2)}
-        </span>
-			),
+			render: (rowData: User) => `$${rowData.monthlyRate}`
 		},
 		{
-			title: t('Gender'),
-			field: 'gender',
+			title: t('Marital Status'),
+			field: 'maritalStatus'
 		},
+		{
+			title: t('Over Time'),
+			field: 'overTime'
+		},
+		{
+			title: t('Years at Company'),
+			field: 'yearsAtCompany'
+		},
+		{
+			title: t('Years Since Last Promotion'),
+			field: 'yearsSinceLastPromotion'
+		}
 	];
 
 	const handleConfirmStatusChange = async () => {
@@ -104,7 +104,7 @@ function WebType() {
 		const id = selectedActiveRowData?.id ?? null;
 		try {
 			const data = {
-				is_active: !selectedActiveRowData?.active,
+				is_active: !selectedActiveRowData?.active
 			};
 			// This function seems to be missing from your services, you might need to implement it
 			// await updateSomeStatus(id, data);
@@ -131,6 +131,9 @@ function WebType() {
 					monthlyRate: item.monthlyRate,
 					gender: item.gender,
 					userId: item.userId,
+					overTime: item.overTime,
+					yearsAtCompany: item.yearsAtCompany,
+					yearsSinceLastPromotion: item.yearsSinceLastPromotion
 				}));
 				setSampleData(transformedData);
 				setCount(response.result.totalElements);

@@ -13,8 +13,9 @@ import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
-import TextFormField from '../../../../../common/FormComponents/FormTextField';
+import TextFormField from '../../../../../common/FormComponents/FormTextField'; // Assuming this component exists
 
+// The UserType should match the keys used in your form state (PascalCase)
 interface UserType {
 	employee_name: string;
 	Age: number;
@@ -36,6 +37,7 @@ interface UserType {
 	MonthlyRate: number;
 	NumCompaniesWorked: number;
 	OverTime: string;
+	PerformanceRating: number; // Added this field
 	RelationshipSatisfaction: number;
 	StockOptionLevel: number;
 	TotalWorkingYears: number;
@@ -47,10 +49,12 @@ interface UserType {
 	YearsWithCurrManager: number;
 }
 
+// Props interface for the component
 interface Props {
 	isOpen: boolean;
 	toggleModal: () => void;
-	clickedRowData: UserType | null;
+	// The incoming data object can have any shape, but we know its keys are camelCase
+	clickedRowData: Record<string, any> | null;
 	fetchAllUsers: () => void;
 	isTableMode: 'view' | 'edit' | 'new';
 }
@@ -63,8 +67,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 													isTableMode
 												}) => {
 	const { t } = useTranslation('userRegistration');
+
+	console.log('Clicked Row Data:', clickedRowData);
+
 	const [isDataLoading, setDataLoading] = useState<boolean>(false);
 
+	// Dropdown options
 	const educationOptions = [
 		{ value: 1, label: 'Below College' },
 		{ value: 2, label: 'College' },
@@ -90,6 +98,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 		{ value: 3, label: 'High' },
 		{ value: 4, label: 'Very High' }
 	];
+	const performanceRatingOptions = [ // Added performance rating options
+		{ value: 1, label: 'Low' },
+		{ value: 2, label: 'Good' },
+		{ value: 3, label: 'Excellent' },
+		{ value: 4, label: 'Outstanding' }
+	];
 	const relationshipSatisfactionOptions = [
 		{ value: 1, label: 'Low' },
 		{ value: 2, label: 'Medium' },
@@ -103,6 +117,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 		{ value: 4, label: 'Best' }
 	];
 
+	// Form validation schema
 	const validationSchema = yup.object().shape({
 		employee_name: yup.string().required(t('Employee Name is required')).trim(),
 		Age: yup.number().required(t('Age is required')).positive().integer(),
@@ -124,6 +139,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 		MonthlyRate: yup.number().required(t('Monthly Rate is required')).positive(),
 		NumCompaniesWorked: yup.number().required(t('Number of Companies Worked is required')).min(0).integer(),
 		OverTime: yup.string().required(t('Over Time is required')).trim(),
+		PerformanceRating: yup.number().required(t('Performance Rating is required')), // Added validation
 		RelationshipSatisfaction: yup.number().required(t('Relationship Satisfaction is required')),
 		StockOptionLevel: yup.number().required(t('Stock Option Level is required')).min(0).integer(),
 		TotalWorkingYears: yup.number().required(t('Total Working Years is required')).min(0).integer(),
@@ -135,18 +151,19 @@ const UserRegistrationModal: React.FC<Props> = ({
 		YearsWithCurrManager: yup.number().required(t('Years With Current Manager is required')).min(0).integer()
 	});
 
+	// Form submission handler
 	const handleSubmit = async (values: UserType) => {
 		try {
 			setDataLoading(true);
 			console.log('Submitted User Data:', values);
 
 			if (isTableMode === 'edit') {
-				// await updateUser(clickedRowData._id, data); // Uncomment and implement API call
+				// await updateUser(clickedRowData._id, values); // Use values directly
 				fetchAllUsers();
 				toggleModal();
 				toast.success(t('User updated successfully'));
 			} else {
-				// await createNewUser(data); // Uncomment and implement API call
+				// await createNewUser(values); // Use values directly
 				fetchAllUsers();
 				toggleModal();
 				toast.success(t('User created successfully'));
@@ -158,36 +175,38 @@ const UserRegistrationModal: React.FC<Props> = ({
 		}
 	};
 
+	// **FIXED**: Initial values now correctly map from camelCase (logs) to PascalCase (form)
 	const initialValues: UserType = {
-		employee_name: clickedRowData?.employee_name || '',
-		Age: clickedRowData?.Age || 0,
-		BusinessTravel: clickedRowData?.BusinessTravel || '',
-		DailyRate: clickedRowData?.DailyRate || 0,
-		Department: clickedRowData?.Department || '',
-		DistanceFromHome: clickedRowData?.DistanceFromHome || 0,
-		Education: clickedRowData?.Education || 0,
-		EducationField: clickedRowData?.EducationField || '',
-		EnvironmentSatisfaction: clickedRowData?.EnvironmentSatisfaction || 0,
-		Gender: clickedRowData?.Gender || '',
-		HourlyRate: clickedRowData?.HourlyRate || 0,
-		JobInvolvement: clickedRowData?.JobInvolvement || 0,
-		JobLevel: clickedRowData?.JobLevel || 0,
-		JobRole: clickedRowData?.JobRole || '',
-		JobSatisfaction: clickedRowData?.JobSatisfaction || 0,
-		MaritalStatus: clickedRowData?.MaritalStatus || '',
-		MonthlyIncome: clickedRowData?.MonthlyIncome || 0,
-		MonthlyRate: clickedRowData?.MonthlyRate || 0,
-		NumCompaniesWorked: clickedRowData?.NumCompaniesWorked || 0,
-		OverTime: clickedRowData?.OverTime || '',
-		RelationshipSatisfaction: clickedRowData?.RelationshipSatisfaction || 0,
-		StockOptionLevel: clickedRowData?.StockOptionLevel || 0,
-		TotalWorkingYears: clickedRowData?.TotalWorkingYears || 0,
-		TrainingTimesLastYear: clickedRowData?.TrainingTimesLastYear || 0,
-		WorkLifeBalance: clickedRowData?.WorkLifeBalance || 0,
-		YearsAtCompany: clickedRowData?.YearsAtCompany || 0,
-		YearsInCurrentRole: clickedRowData?.YearsInCurrentRole || 0,
-		YearsSinceLastPromotion: clickedRowData?.YearsSinceLastPromotion || 0,
-		YearsWithCurrManager: clickedRowData?.YearsWithCurrManager || 0
+		employee_name: clickedRowData?.employeeName || '',
+		Age: clickedRowData?.age || 0,
+		BusinessTravel: clickedRowData?.businessTravel || '',
+		DailyRate: clickedRowData?.dailyRate || 0,
+		Department: clickedRowData?.department || '',
+		DistanceFromHome: clickedRowData?.distanceFromHome || 0,
+		Education: clickedRowData?.education || 0,
+		EducationField: clickedRowData?.educationField || '',
+		EnvironmentSatisfaction: clickedRowData?.environmentSatisfaction || 0,
+		Gender: clickedRowData?.gender || '',
+		HourlyRate: clickedRowData?.hourlyRate || 0,
+		JobInvolvement: clickedRowData?.jobInvolvement || 0,
+		JobLevel: clickedRowData?.jobLevel || 0,
+		JobRole: clickedRowData?.jobRole || '',
+		JobSatisfaction: clickedRowData?.jobSatisfaction || 0,
+		MaritalStatus: clickedRowData?.maritalStatus || '',
+		MonthlyIncome: clickedRowData?.monthlyIncome || 0,
+		MonthlyRate: clickedRowData?.monthlyRate || 0,
+		NumCompaniesWorked: clickedRowData?.numCompaniesWorked || 0,
+		OverTime: clickedRowData?.overTime || '',
+		PerformanceRating: clickedRowData?.performanceRating || 0, // Added field
+		RelationshipSatisfaction: clickedRowData?.relationshipSatisfaction || 0,
+		StockOptionLevel: clickedRowData?.stockOptionLevel || 0,
+		TotalWorkingYears: clickedRowData?.totalWorkingYears || 0,
+		TrainingTimesLastYear: clickedRowData?.trainingTimesLastYear || 0,
+		WorkLifeBalance: clickedRowData?.workLifeBalance || 0,
+		YearsAtCompany: clickedRowData?.yearsAtCompany || 0,
+		YearsInCurrentRole: clickedRowData?.yearsInCurrentRole || 0,
+		YearsSinceLastPromotion: clickedRowData?.yearsSinceLastPromotion || 0,
+		YearsWithCurrManager: clickedRowData?.yearsWithCurrManager || 0
 	};
 
 	return (
@@ -198,7 +217,11 @@ const UserRegistrationModal: React.FC<Props> = ({
 			PaperProps={{ style: { top: '40px', margin: 0, position: 'absolute' } }}
 		>
 			<DialogTitle>
-				<Typography variant="h6" color="textSecondary" fontWeight={400}>
+				<Typography
+					variant="h6"
+					color="textSecondary"
+					fontWeight={400}
+				>
 					{t('User Registration')}
 				</Typography>
 			</DialogTitle>
@@ -211,8 +234,18 @@ const UserRegistrationModal: React.FC<Props> = ({
 				>
 					{({ errors, touched }) => (
 						<Form>
-							<Grid container spacing={2}>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+							<Grid
+								container
+								spacing={2}
+							>
+								{/* Employee Name */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Employee Name')} <span className="text-red-500">*</span>
 									</Typography>
@@ -226,7 +259,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.employee_name && errors.employee_name}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Age */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Age')} <span className="text-red-500">*</span>
 									</Typography>
@@ -241,7 +281,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.Age && errors.Age}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Business Travel */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Business Travel')} <span className="text-red-500">*</span>
 									</Typography>
@@ -255,7 +302,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.BusinessTravel && errors.BusinessTravel}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Daily Rate */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Daily Rate')} <span className="text-red-500">*</span>
 									</Typography>
@@ -270,7 +324,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.DailyRate && errors.DailyRate}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Department */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Department')} <span className="text-red-500">*</span>
 									</Typography>
@@ -284,7 +345,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.Department && errors.Department}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Distance From Home */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Distance From Home')} <span className="text-red-500">*</span>
 									</Typography>
@@ -299,31 +367,51 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.DistanceFromHome && errors.DistanceFromHome}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Education */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Education')} <span className="text-red-500">*</span>
 									</Typography>
 									<Field
-										as="select"
 										name="Education"
 										disabled={isTableMode === 'view'}
 										component={TextFormField}
 										fullWidth
 										size="small"
+										select // This makes the TextFormField act as a select dropdown
 										error={touched.Education && Boolean(errors.Education)}
 										helperText={touched.Education && errors.Education}
 									>
-										<MenuItem value="" disabled>
+										<MenuItem
+											value={0}
+											disabled
+										>
 											{t('Select Education')}
 										</MenuItem>
 										{educationOptions.map((option) => (
-											<MenuItem key={option.value} value={option.value}>
+											<MenuItem
+												key={option.value}
+												value={option.value}
+											>
 												{option.label}
 											</MenuItem>
 										))}
 									</Field>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Education Field */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Education Field')} <span className="text-red-500">*</span>
 									</Typography>
@@ -337,31 +425,53 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.EducationField && errors.EducationField}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Environment Satisfaction */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Environment Satisfaction')} <span className="text-red-500">*</span>
 									</Typography>
 									<Field
-										as="select"
 										name="EnvironmentSatisfaction"
 										disabled={isTableMode === 'view'}
 										component={TextFormField}
 										fullWidth
 										size="small"
-										error={touched.EnvironmentSatisfaction && Boolean(errors.EnvironmentSatisfaction)}
+										select
+										error={
+											touched.EnvironmentSatisfaction && Boolean(errors.EnvironmentSatisfaction)
+										}
 										helperText={touched.EnvironmentSatisfaction && errors.EnvironmentSatisfaction}
 									>
-										<MenuItem value="" disabled>
+										<MenuItem
+											value={0}
+											disabled
+										>
 											{t('Select Environment Satisfaction')}
 										</MenuItem>
 										{environmentSatisfactionOptions.map((option) => (
-											<MenuItem key={option.value} value={option.value}>
+											<MenuItem
+												key={option.value}
+												value={option.value}
+											>
 												{option.label}
 											</MenuItem>
 										))}
 									</Field>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Gender */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Gender')} <span className="text-red-500">*</span>
 									</Typography>
@@ -375,7 +485,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.Gender && errors.Gender}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Hourly Rate */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Hourly Rate')} <span className="text-red-500">*</span>
 									</Typography>
@@ -390,31 +507,51 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.HourlyRate && errors.HourlyRate}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Job Involvement */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Job Involvement')} <span className="text-red-500">*</span>
 									</Typography>
 									<Field
-										as="select"
 										name="JobInvolvement"
 										disabled={isTableMode === 'view'}
 										component={TextFormField}
 										fullWidth
 										size="small"
+										select
 										error={touched.JobInvolvement && Boolean(errors.JobInvolvement)}
 										helperText={touched.JobInvolvement && errors.JobInvolvement}
 									>
-										<MenuItem value="" disabled>
+										<MenuItem
+											value={0}
+											disabled
+										>
 											{t('Select Job Involvement')}
 										</MenuItem>
 										{jobInvolvementOptions.map((option) => (
-											<MenuItem key={option.value} value={option.value}>
+											<MenuItem
+												key={option.value}
+												value={option.value}
+											>
 												{option.label}
 											</MenuItem>
 										))}
 									</Field>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Job Level */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Job Level')} <span className="text-red-500">*</span>
 									</Typography>
@@ -429,7 +566,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.JobLevel && errors.JobLevel}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Job Role */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Job Role')} <span className="text-red-500">*</span>
 									</Typography>
@@ -443,31 +587,51 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.JobRole && errors.JobRole}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Job Satisfaction */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Job Satisfaction')} <span className="text-red-500">*</span>
 									</Typography>
 									<Field
-										as="select"
 										name="JobSatisfaction"
 										disabled={isTableMode === 'view'}
 										component={TextFormField}
 										fullWidth
 										size="small"
+										select
 										error={touched.JobSatisfaction && Boolean(errors.JobSatisfaction)}
 										helperText={touched.JobSatisfaction && errors.JobSatisfaction}
 									>
-										<MenuItem value="" disabled>
+										<MenuItem
+											value={0}
+											disabled
+										>
 											{t('Select Job Satisfaction')}
 										</MenuItem>
 										{jobSatisfactionOptions.map((option) => (
-											<MenuItem key={option.value} value={option.value}>
+											<MenuItem
+												key={option.value}
+												value={option.value}
+											>
 												{option.label}
 											</MenuItem>
 										))}
 									</Field>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Marital Status */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Marital Status')} <span className="text-red-500">*</span>
 									</Typography>
@@ -481,7 +645,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.MaritalStatus && errors.MaritalStatus}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Monthly Income */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Monthly Income')} <span className="text-red-500">*</span>
 									</Typography>
@@ -496,7 +667,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.MonthlyIncome && errors.MonthlyIncome}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Monthly Rate */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Monthly Rate')} <span className="text-red-500">*</span>
 									</Typography>
@@ -511,7 +689,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.MonthlyRate && errors.MonthlyRate}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Num Companies Worked */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Num Companies Worked')} <span className="text-red-500">*</span>
 									</Typography>
@@ -526,7 +711,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.NumCompaniesWorked && errors.NumCompaniesWorked}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Over Time */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Over Time')} <span className="text-red-500">*</span>
 									</Typography>
@@ -540,31 +732,90 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.OverTime && errors.OverTime}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* **NEW** Performance Rating */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
-										{t('Relationship Satisfaction')} <span className="text-red-500">*</span>
+										{t('Performance Rating')} <span className="text-red-500">*</span>
 									</Typography>
 									<Field
-										as="select"
-										name="RelationshipSatisfaction"
+										name="PerformanceRating"
 										disabled={isTableMode === 'view'}
 										component={TextFormField}
 										fullWidth
 										size="small"
-										error={touched.RelationshipSatisfaction && Boolean(errors.RelationshipSatisfaction)}
-										helperText={touched.RelationshipSatisfaction && errors.RelationshipSatisfaction}
+										select
+										error={touched.PerformanceRating && Boolean(errors.PerformanceRating)}
+										helperText={touched.PerformanceRating && errors.PerformanceRating}
 									>
-										<MenuItem value="" disabled>
-											{t('Select Relationship Satisfaction')}
+										<MenuItem
+											value={0}
+											disabled
+										>
+											{t('Select Performance Rating')}
 										</MenuItem>
-										{relationshipSatisfactionOptions.map((option) => (
-											<MenuItem key={option.value} value={option.value}>
+										{performanceRatingOptions.map((option) => (
+											<MenuItem
+												key={option.value}
+												value={option.value}
+											>
 												{option.label}
 											</MenuItem>
 										))}
 									</Field>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Relationship Satisfaction */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
+									<Typography>
+										{t('Relationship Satisfaction')} <span className="text-red-500">*</span>
+									</Typography>
+									<Field
+										name="RelationshipSatisfaction"
+										disabled={isTableMode === 'view'}
+										component={TextFormField}
+										fullWidth
+										size="small"
+										select
+										error={
+											touched.RelationshipSatisfaction && Boolean(errors.RelationshipSatisfaction)
+										}
+										helperText={touched.RelationshipSatisfaction && errors.RelationshipSatisfaction}
+									>
+										<MenuItem
+											value={0}
+											disabled
+										>
+											{t('Select Relationship Satisfaction')}
+										</MenuItem>
+										{relationshipSatisfactionOptions.map((option) => (
+											<MenuItem
+												key={option.value}
+												value={option.value}
+											>
+												{option.label}
+											</MenuItem>
+										))}
+									</Field>
+								</Grid>
+								{/* Stock Option Level */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Stock Option Level')} <span className="text-red-500">*</span>
 									</Typography>
@@ -579,7 +830,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.StockOptionLevel && errors.StockOptionLevel}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Total Working Years */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Total Working Years')} <span className="text-red-500">*</span>
 									</Typography>
@@ -594,7 +852,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.TotalWorkingYears && errors.TotalWorkingYears}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Training Times Last Year */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Training Times Last Year')} <span className="text-red-500">*</span>
 									</Typography>
@@ -609,31 +874,51 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.TrainingTimesLastYear && errors.TrainingTimesLastYear}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Work Life Balance */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Work Life Balance')} <span className="text-red-500">*</span>
 									</Typography>
 									<Field
-										as="select"
 										name="WorkLifeBalance"
 										disabled={isTableMode === 'view'}
 										component={TextFormField}
 										fullWidth
 										size="small"
+										select
 										error={touched.WorkLifeBalance && Boolean(errors.WorkLifeBalance)}
 										helperText={touched.WorkLifeBalance && errors.WorkLifeBalance}
 									>
-										<MenuItem value="" disabled>
+										<MenuItem
+											value={0}
+											disabled
+										>
 											{t('Select Work Life Balance')}
 										</MenuItem>
 										{workLifeBalanceOptions.map((option) => (
-											<MenuItem key={option.value} value={option.value}>
+											<MenuItem
+												key={option.value}
+												value={option.value}
+											>
 												{option.label}
 											</MenuItem>
 										))}
 									</Field>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Years At Company */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Years At Company')} <span className="text-red-500">*</span>
 									</Typography>
@@ -648,7 +933,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.YearsAtCompany && errors.YearsAtCompany}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Years In Current Role */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Years In Current Role')} <span className="text-red-500">*</span>
 									</Typography>
@@ -663,7 +955,14 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.YearsInCurrentRole && errors.YearsInCurrentRole}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Years Since Last Promotion */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Years Since Last Promotion')} <span className="text-red-500">*</span>
 									</Typography>
@@ -674,11 +973,20 @@ const UserRegistrationModal: React.FC<Props> = ({
 										component={TextFormField}
 										fullWidth
 										size="small"
-										error={touched.YearsSinceLastPromotion && Boolean(errors.YearsSinceLastPromotion)}
+										error={
+											touched.YearsSinceLastPromotion && Boolean(errors.YearsSinceLastPromotion)
+										}
 										helperText={touched.YearsSinceLastPromotion && errors.YearsSinceLastPromotion}
 									/>
 								</Grid>
-								<Grid item lg={4} md={4} sm={6} xs={12}>
+								{/* Years With Curr Manager */}
+								<Grid
+									item
+									lg={4}
+									md={4}
+									sm={6}
+									xs={12}
+								>
 									<Typography>
 										{t('Years With Curr Manager')} <span className="text-red-500">*</span>
 									</Typography>
@@ -693,7 +1001,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										helperText={touched.YearsWithCurrManager && errors.YearsWithCurrManager}
 									/>
 								</Grid>
-								<Grid item lg={12} className="flex justify-end gap-2">
+								{/* Action Buttons */}
+								<Grid
+									item
+									lg={12}
+									className="flex justify-end gap-2"
+								>
 									<Button
 										type="submit"
 										variant="contained"

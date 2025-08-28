@@ -14,6 +14,7 @@ import { fetchAllUsersByPagination } from '../../../../axios/services/mega-city-
 // Define interfaces based on API response
 interface User {
 	id: number;
+	userId: number;
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -279,8 +280,9 @@ function Category(): JSX.Element {
 	const tableColumns: TableColumn[] = [
 		{
 			title: t('Employee Code'),
-			field: 'employeeCode',
-			cellStyle: { padding: '6px 8px' }
+			field: 'userId',
+			cellStyle: { padding: '6px 8px' },
+			render: (rowData: User) => `EMPID-00${rowData.userId}`
 		},
 		{
 			title: t('Name'),
@@ -293,38 +295,38 @@ function Category(): JSX.Element {
 			field: 'email',
 			cellStyle: { padding: '4px 8px' }
 		},
-		{
-			title: t('Role'),
-			field: 'role',
-			cellStyle: { padding: '4px 8px' },
-			render: (rowData: User) => {
-				const roleColors: { [key: string]: { text: string; bg: string } } = {
-					SYSTEM_ADMIN: { text: '#1976D2', bg: '#E3F2FD' },
-					EMPLOYEE: { text: '#388E3C', bg: '#E8F5E9' },
-					HR_MANAGER: { text: '#F57C00', bg: '#FFF3E0' },
-					INTERN: { text: '#D32F2F', bg: '#FBE9E7' },
-					FINANCE_OFFICER: { text: '#9C27B0', bg: '#F3E5F5' }
-				};
-				const { text, bg } = roleColors[rowData.role] || { text: '#424242', bg: '#E0E0E0' };
-				return (
-					<span
-						style={{
-							display: 'inline-block',
-							padding: '4px 12px',
-							borderRadius: '16px',
-							color: text,
-							backgroundColor: bg,
-							fontSize: '12px',
-							fontWeight: 500,
-							textAlign: 'center',
-							minWidth: '80px'
-						}}
-					>
-						{t(rowData.role)}
-					</span>
-				);
-			}
-		},
+		// {
+		// 	title: t('Role'),
+		// 	field: 'role',
+		// 	cellStyle: { padding: '4px 8px' },
+		// 	render: (rowData: User) => {
+		// 		const roleColors: { [key: string]: { text: string; bg: string } } = {
+		// 			SYSTEM_ADMIN: { text: '#1976D2', bg: '#E3F2FD' },
+		// 			EMPLOYEE: { text: '#388E3C', bg: '#E8F5E9' },
+		// 			HR_MANAGER: { text: '#F57C00', bg: '#FFF3E0' },
+		// 			INTERN: { text: '#D32F2F', bg: '#FBE9E7' },
+		// 			FINANCE_OFFICER: { text: '#9C27B0', bg: '#F3E5F5' }
+		// 		};
+		// 		const { text, bg } = roleColors[rowData.role] || { text: '#424242', bg: '#E0E0E0' };
+		// 		return (
+		// 			<span
+		// 				style={{
+		// 					display: 'inline-block',
+		// 					padding: '4px 12px',
+		// 					borderRadius: '16px',
+		// 					color: text,
+		// 					backgroundColor: bg,
+		// 					fontSize: '12px',
+		// 					fontWeight: 500,
+		// 					textAlign: 'center',
+		// 					minWidth: '80px'
+		// 				}}
+		// 			>
+		// 				{t(rowData.role)}
+		// 			</span>
+		// 		);
+		// 	}
+		// },
 		{
 			title: t('Department'),
 			field: 'department',
@@ -332,7 +334,7 @@ function Category(): JSX.Element {
 		},
 		{
 			title: t('Designation'),
-			field: 'designation',
+			field: 'jobRole',
 			cellStyle: { padding: '4px 8px' }
 		},
 		{
@@ -367,9 +369,9 @@ function Category(): JSX.Element {
 		},
 		{
 			title: t('Join Date'),
-			field: 'joinDate',
+			field: 'createdAt',
 			cellStyle: { padding: '4px 8px' },
-			render: (rowData: User) => new Date(rowData.joinDate).toLocaleDateString()
+			render: (rowData: User) => new Date(rowData.createdAt).toLocaleDateString()
 		}
 	];
 
