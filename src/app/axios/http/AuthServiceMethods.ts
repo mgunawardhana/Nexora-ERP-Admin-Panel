@@ -6,11 +6,6 @@ export async function getAuth<T>(url: string, config: AxiosRequestConfig = {}): 
 	return response.data;
 }
 
-// export async function postAuth<T>(url: string, data: any, config: AxiosRequestConfig = {}): Promise<T> {
-// 	const response = await axiosApiAuth.post<T>(url, { ...data }, { ...config });
-// 	return response;
-// }
-
 export async function postAuth<T>(url: string, data: any, config: AxiosRequestConfig = {}): Promise<T> {
 	const response = await axiosApiAuth.post<T>(url, data, config);
 	return response.data;

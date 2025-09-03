@@ -26,14 +26,14 @@ import RoleSelectionRoot from '../main/live-aquaria/sample-component/new-one/Rol
 
 const routeConfigs: FuseRouteConfigsType = [
 	SignOutConfig,
-	SignInConfig, // SignUpConfig,
+	SignInConfig,
 	DocumentationConfig,
 	...PagesConfigs,
 	...UserInterfaceConfigs,
 	...DashboardsConfigs,
-	...GuidelineManagementRoot, // ...AppsConfigs,
+	...GuidelineManagementRoot,
 	...authRoleExamplesConfigs,
-	...userManagementConfigs, // ...ticketManagementConfigs,
+	...userManagementConfigs,
 	...customerManagementConfigs,
 	...WebSiteRoot,
 	...VehicleManagementRoot,

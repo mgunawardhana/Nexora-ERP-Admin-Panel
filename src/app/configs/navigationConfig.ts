@@ -20,13 +20,6 @@ const navigationConfig: FuseNavItemType[] = [
 		icon: 'heroicons-outline:home',
 		translate: 'ANALYTICS_MANAGEMENT',
 
-		// id: 'salesManagement',
-		// title: 'Sales Management',
-		// type: 'collapse',
-		// icon: 'heroicons-outline:bookmark',
-		// translate: 'EMPLOYEE_MANAGEMENT',
-		// children: [
-
 		children: [
 			{
 				id: 'dashboards.project',
@@ -64,14 +57,7 @@ const navigationConfig: FuseNavItemType[] = [
 						url: '/dashboards/analytics-status-base'
 					}
 				]
-				// url: '/dashboards/analytics'
-			} // {
-			// 	id: 'dashboards.finance',
-			// 	title: 'Finance',
-			// 	type: 'item',
-			// 	icon: 'heroicons-outline:cash',
-			// 	url: '/dashboards/finance'
-			// }
+			}
 		]
 	},
 	{
@@ -91,52 +77,7 @@ const navigationConfig: FuseNavItemType[] = [
 				translate: 'USERS'
 			}
 		]
-	}, // {
-	// 	id: 'stockManagement',
-	// 	title: 'Stock Management',
-	// 	type: 'collapse', // Changed from 'item' to 'collapse'
-	// 	icon: 'heroicons-outline:clipboard',
-	// 	translate: 'STOCK_MANAGEMENT',
-	// 	children: [
-	// 		{
-	// 			id: 'stockManagement.stocks',
-	// 			title: 'Issued Stocks',
-	// 			type: 'item',
-	// 			icon: 'heroicons-outline:clipboard-check',
-	// 			url: 'stocks/issued-stocks'
-	// 		},
-	// 		{
-	// 			id: 'stockManagement.suppliers',
-	// 			title: 'Recieved Stocks',
-	// 			type: 'item',
-	// 			icon: 'heroicons-outline:truck',
-	// 			url: 'stocks/received-stocks'
-	// 		},
-	// 		// {
-	// 		// 	id: 'stockManagement.categories',
-	// 		// 	title: 'Create Categories',
-	// 		// 	type: 'item',
-	// 		// 	icon: 'heroicons-outline:tag',
-	// 		// 	url: 'stocks/create-category'
-	// 		// },
-	// 		// {
-	// 		// 	id: 'stockManagement.product',
-	// 		// 	title: 'Product Management',
-	// 		// 	type: 'item',
-	// 		// 	icon: 'heroicons-outline:cube',
-	// 		// 	url: 'stocks/vehicle-management'
-	// 		// }
-	// 	]
-	// },
-	// {
-	// 	id: 'product',
-	// 	title: 'Product',
-	// 	type: 'item',
-	// 	icon: 'heroicons-outline:cube',
-	// 	url: '/vehicle/vehicle-management',
-	// 	end: true,
-	// 	translate: 'PRODUCT_MANAGEMENT'
-	// },
+	},
 	{
 		id: 'salesManagement',
 		title: 'Sales Management',
@@ -144,13 +85,6 @@ const navigationConfig: FuseNavItemType[] = [
 		icon: 'heroicons-outline:bookmark',
 		translate: 'EMPLOYEE_MANAGEMENT',
 		children: [
-			// 		// {
-			// 		// 	id: 'salesManagement.bookings',
-			// 		// 	title: 'Sales',
-			// 		// 	type: 'item',
-			// 		// 	icon: 'heroicons-outline:currency-dollar',
-			// 		// 	url: '/web/booking-type'
-			// 		// },
 			{
 				id: 'salesManagement.orders',
 				title: 'AI Recommendation',
@@ -174,15 +108,6 @@ const navigationConfig: FuseNavItemType[] = [
 			}
 		]
 	}
-	// {
-	// 	id: 'website',
-	// 	title: 'Website',
-	// 	type: 'item',
-	// 	icon: 'heroicons-outline:globe-alt',
-	// 	url: '/web/web-site-management',
-	// 	end: true,
-	// 	translate: 'LATEST_NEWS'
-	// }
 ];
 
 export default navigationConfig;
