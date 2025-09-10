@@ -42,6 +42,7 @@ interface UserData {
 	yearsAtCompany?: number;
 	yearsSinceLastPromotion?: number;
 	email?: string;
+	department?: string;
 }
 
 interface Props {
@@ -65,12 +66,12 @@ const meterSegments = [
 // --- MAIN COMPONENT ---
 
 function UpdateUserStatusModal({
-	isOpen = true,
-	toggleModal = () => console.log('Close modal clicked'),
-	clickedRowData,
-	fetchAllUsers,
-	isEditMode = false
-}: Props) {
+								   isOpen = true,
+								   toggleModal = () => console.log('Close modal clicked'),
+								   clickedRowData,
+								   fetchAllUsers,
+								   isEditMode = false
+							   }: Props) {
 	const { t } = useTranslation('userManagement');
 	const [isDataLoading, setDataLoading] = useState(false);
 	const [isLlmLoading, setLlmLoading] = useState(false);
@@ -125,6 +126,7 @@ function UpdateUserStatusModal({
 		toast.success('User status action confirmed!');
 	};
 
+	// --- MODIFIED FUNCTION ---
 	const handleLlmGetAndSave = async () => {
 		if (!clickedRowData?.userId) {
 			toast.warn('User ID is missing. Cannot proceed.');
@@ -132,29 +134,95 @@ function UpdateUserStatusModal({
 		}
 
 		setLlmLoading(true);
+
+		const prompt = `
+        Analyze the following employee data:
+        - Employee Name: ${clickedRowData?.employeeName || 'N/A'}
+        - Employee ID: ${clickedRowData?.userId || 'N/A'}
+        - Monthly Rate: ${clickedRowData?.monthlyRate || 'N/A'}
+        - Performance Score: ${predictionData?.prediction?.performance_rating || 'N/A'}
+        - Years Since Last Promotion: ${clickedRowData?.yearsSinceLastPromotion || 'N/A'}
+        - Current ML Suggestion: "${predictionData?.prediction?.suggestions || 'N/A'}"
+        
+        Based on this data, please provide a concise suggestion (3-4 lines) for the HR department regarding this employee's eligibility for a salary review or promotion.
+        `;
+
 		try {
-			const response = await getLlmPrediction(String(clickedRowData.userId));
+			// Step 1: Call Gemini for the suggestion
+			const geminiApiResponse = await fetch(
+				`http://localhost:8080/api/v1/model/gemini-for/advanced/decision?prompt=${encodeURIComponent(
+					prompt
+				)}`
+			);
 
-			if (response.result && response.result.status !== 'error') {
-				setPredictionData(response.result);
-				toast.success('Enhanced prediction received!');
-
-				if (fetchAllUsers) {
-					await fetchAllUsers();
-				}
-
-				toggleModal();
-			} else {
-				toast.error(response.result?.status || 'Failed to get an enhanced prediction.');
+			if (!geminiApiResponse.ok) {
+				throw new Error('Failed to get an enhanced prediction.');
 			}
+
+			const geminiResult = await geminiApiResponse.json();
+			const suggestionText = geminiResult.result;
+
+			if (!suggestionText || typeof suggestionText !== 'string') {
+				throw new Error('Could not get a valid suggestion string from the API response.');
+			}
+
+			// Step 2: Prepare payload and save the suggestion
+			const nameParts = clickedRowData?.employeeName?.split(' ') || [];
+			const firstName = nameParts[0] || 'N/A';
+			const lastName = nameParts.slice(1).join(' ') || 'N/A';
+
+			const suggestionPayload = {
+				firstName,
+				lastName,
+				fullName: clickedRowData?.employeeName || 'N/A',
+				department: clickedRowData?.department || 'N/A',
+				employeeCode: `EMPID-00${clickedRowData?.userId}`,
+				suggestion: suggestionText
+			};
+
+			const saveResponse = await fetch('http://localhost:8080/api/v1/attendance/save-suggestions', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(suggestionPayload)
+			});
+
+			if (!saveResponse.ok) {
+				const errorData = await saveResponse.json();
+				throw new Error(errorData.message || 'Failed to save the suggestion.');
+			}
+
+			toast.success('Enhanced suggestion has been saved!');
+
+			// --- THIS IS THE FIX ---
+			// 1. Refresh the background table data
+			if (fetchAllUsers) {
+				await fetchAllUsers();
+			}
+
+			// 2. Update the suggestion text shown inside this modal
+			setPredictionData(currentData => {
+				// Return a new object to trigger a re-render
+				return {
+					...(currentData as ApiResponse),
+					prediction: {
+						...(currentData?.prediction as PredictionData),
+						suggestions: suggestionText, // Update with the new suggestion
+					},
+				};
+			});
+
+			// 3. The line that closes the modal has been removed as requested
+			// toggleModal();
+
 		} catch (error) {
-			toast.error('An unexpected error occurred while contacting the AI.');
+			console.error('Operation failed:', error);
+			toast.error(error instanceof Error ? error.message : 'An unexpected error occurred.');
 		} finally {
 			setLlmLoading(false);
 		}
 	};
 
-	// --- MODIFIED: Handler for sending welcome email via EmailJS ---
+
 	const handleNotifyUser = async () => {
 		if (!clickedRowData?.email) {
 			toast.warn('Employee email is missing. Cannot send notification.');
@@ -163,7 +231,6 @@ function UpdateUserStatusModal({
 
 		setIsNotifying(true);
 
-		// Replace these with your actual EmailJS credentials
 		const serviceID = 'service_oxr5toy';
 		const templateID = 'template_cx24pet';
 		const publicKey = 'CImQqVmdDtxFUAGD9';
@@ -208,6 +275,7 @@ The ${'Nexora Systems'} Team`
 				<Typography variant="h6">{t('Update User Status & View Prediction')}</Typography>
 			</DialogTitle>
 			<DialogContent>
+				{/* ... The rest of your JSX remains unchanged ... */}
 				<Typography
 					variant="subtitle1"
 					gutterBottom
