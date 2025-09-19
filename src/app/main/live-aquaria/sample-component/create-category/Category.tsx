@@ -4,6 +4,7 @@ import { Form, Formik, FormikHelpers } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { deleteUser } from 'src/app/axios/services/mega-city-services/category-services/Category';
 import NavigationViewComp from '../../../../common/FormComponents/NavigationViewComp';
 import MaterialTableWrapper from '../../../../common/tableComponents/MaterialTableWrapper';
 import CategoryEditModel from './components/CategoryEditModel';
@@ -248,10 +249,12 @@ function Category(): JSX.Element {
 	}, [selectedActiveRowData, fetchUsers, t, toggleActiveModal]);
 
 	const handleAlertForm = useCallback(async (): Promise<void> => {
-		if (!selectedDeleteRowData?.id) return;
+		console.log(selectedDeleteRowData);
+
+		if (!selectedDeleteRowData?.userId) return;
 
 		try {
-			// await deleteCategory(selectedDeleteRowData.id);
+			await deleteUser(selectedDeleteRowData.userId);
 			await fetchUsers();
 			toast.success(t('userDeleted'));
 			toggleDeleteModal();

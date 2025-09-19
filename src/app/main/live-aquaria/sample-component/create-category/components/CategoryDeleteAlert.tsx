@@ -11,7 +11,7 @@ import { GuideType } from '../types/GuidelineTypes';
 interface Props {
 	toggleModal: () => void;
 	isOpen: boolean;
-	clickedRowData: GuideType;
+	clickedRowData: any;
 	handleAlertForm: () => void;
 }
 
@@ -27,12 +27,12 @@ function CategoryDeleteAlert({ toggleModal, isOpen, clickedRowData, handleAlertF
 			</DialogTitle>
 			<DialogContent>
 				<DialogContentText className="text-[10px] sm:text-[12px] lg:text-[14px]">
-					Are you sure you want to delete this Category ?
+					Are you sure you want to delete this User ?
 				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
 				<Button
-					className="flex justify-center items-center min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-white font-500 py-0 rounded-[6px] bg-yellow-800 hover:bg-yell/80 bokShadow"
+					className="flex justify-center items-center min-w-[100px] min-h-[36px] max-h-[36px] text-[10px] sm:text-[12px] lg:text-[14px] text-white font-500 py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow/80 bokShadow"
 					variant="contained"
 					size="medium"
 					onClick={handleAlertForm}
