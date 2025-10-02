@@ -21,7 +21,11 @@ import * as yup from 'yup';
 // NPN Install: npm install qrcode.react html-to-image
 import { QRCodeCanvas } from 'qrcode.react';
 import { toPng } from 'html-to-image';
-import TextFormField from '../../../../../common/FormComponents/FormTextField'; // Assuming this component exists
+import TextFormField from '../../../../../common/FormComponents/FormTextField';
+import {
+	registerUser,
+	updateUser
+} from '../../../../../axios/services/mega-city-services/user-management-service/UserService'; // Assuming this component exists
 
 // The UserType should match the keys used in your form state
 interface UserType {
@@ -261,12 +265,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 			}
 
 			if (isTableMode === 'edit') {
-				// await updateUser(clickedRowData._id, submissionData);
+				await updateUser(clickedRowData._id, submissionData);
 				fetchAllUsers();
 				toggleModal();
 				toast.success(t('User updated successfully'));
 			} else {
-				// await createNewUser(submissionData);
+				await registerUser(submissionData);
 				fetchAllUsers();
 				toggleModal();
 				toast.success(t('User created successfully'));

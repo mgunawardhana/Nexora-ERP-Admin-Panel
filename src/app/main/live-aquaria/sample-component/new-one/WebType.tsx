@@ -11,7 +11,10 @@ import { ShippingTypeModifiedData } from './types/ShippingTypes';
 import ShippingTypeActiveComp from './components/ShippingTypeActiveComp';
 import ShippingTypeDeleteAlertForm from './components/ShippingTypeDeleteAlertForm';
 import { fetchAllUsersByPagination } from '../../../../axios/services/mega-city-services/user-management-service/UserService';
-import { deleteWebArticle } from '../../../../axios/services/mega-city-services/web-article/WebArticleService';
+import {
+	deleteSuggestion,
+	deleteWebArticle
+} from '../../../../axios/services/mega-city-services/web-article/WebArticleService';
 
 // Define the User interface based on the requested fields
 interface User {
@@ -151,6 +154,9 @@ function WebType() {
 	};
 
 	const handleRowDelete = async (rowData: ShippingTypeModifiedData) => {
+
+		console.log(selectedDeleteRowData)
+
 		setSelectedDeleteRowData(rowData);
 		toggleDeleteModal();
 	};
@@ -159,7 +165,7 @@ function WebType() {
 		toggleDeleteModal();
 		try {
 			// Assuming email is the unique identifier for deletion
-			await deleteWebArticle(selectedDeleteRowData?.email);
+			await deleteSuggestion(selectedDeleteRowData?.id);
 			await fetchAllUsers();
 			toast.success('User deleted successfully');
 		} catch (e) {
@@ -249,7 +255,7 @@ function WebType() {
 						records={sampleData}
 						tableRowViewHandler={handleView}
 						tableRowEditHandler={handleEdit}
-						tableRowDeleteHandler={handleRowDelete}
+						// tableRowDeleteHandler={handleRowDelete}
 						disableColumnFiltering
 					/>
 				</Grid>
