@@ -1,4 +1,4 @@
-import { post } from '../../../http/LiveAquariaServiceMethods';
+import { post, put } from '../../../http/LiveAquariaServiceMethods';
 import * as url from '../url_helper';
 
 export const fetchAllUsersByPagination = (page: string | number, size: string | number) =>
@@ -6,4 +6,4 @@ export const fetchAllUsersByPagination = (page: string | number, size: string | 
 
 export const registerUser = (data: any) => post(url.REGISTER_USER, data);
 
-export const updateUser = (id: any, data: any) => post(`${url.UPDATE_USER}${id}`, data);
+export const updateUser = (id: any, data: any) => put(`${url.UPDATE_USER}${id}`, data);
