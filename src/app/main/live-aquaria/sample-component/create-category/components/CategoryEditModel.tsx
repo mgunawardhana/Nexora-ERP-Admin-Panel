@@ -255,6 +255,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 	);
 
 	// Form submission handler
+// Form submission handler
 	const handleSubmit = async (values: UserType) => {
 		try {
 			setDataLoading(true);
@@ -266,7 +267,8 @@ const UserRegistrationModal: React.FC<Props> = ({
 
 			if (isTableMode === 'edit') {
 				console.log(values);
-				await updateUser(clickedRowData._id, submissionData);
+				// --- FIX IS HERE ---
+				await updateUser(clickedRowData.userId, submissionData);
 				fetchAllUsers();
 				toggleModal();
 				toast.success(t('User updated successfully'));
