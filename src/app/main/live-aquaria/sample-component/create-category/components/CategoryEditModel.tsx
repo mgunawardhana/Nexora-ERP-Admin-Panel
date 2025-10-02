@@ -265,6 +265,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 			}
 
 			if (isTableMode === 'edit') {
+				console.log(values);
 				await updateUser(clickedRowData._id, submissionData);
 				fetchAllUsers();
 				toggleModal();

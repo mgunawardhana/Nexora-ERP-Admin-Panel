@@ -6,4 +6,4 @@ export const fetchAllUsersByPagination = (page: string | number, size: string | 
 
 export const registerUser = (data: any) => post(url.REGISTER_USER, data);
 
-export const updateUser = (id: any, data: any) => put(`${url.UPDATE_USER}${id}`, data);
+export const updateUser = (id: any, data: any) => put(`${url.UPDATE_USER}${3}`, data);

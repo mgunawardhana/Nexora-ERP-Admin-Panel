@@ -18,7 +18,7 @@ export const CREATE_USER = 'api/auth/register';
 // cinnamon miracle
 export const FETCH_ALL_USERS_BY_PAGINATION = 'api/v1/auth/get-all-users?';
 export const REGISTER_USER = 'api/v1/auth/register';
-export const UPDATE_USER = 'api/v1/auth/update/';
+export const UPDATE_USER = 'api/v1/auth/update-user/';
 export const CREATE_CATEGORY = 'api/categories';
 export const FETCH_CATEGORIES = 'api/categories/';
 export const DELETE_USER = 'api/v1/auth/delete-user/';
