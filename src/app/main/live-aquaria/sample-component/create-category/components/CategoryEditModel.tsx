@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
 	Button,
 	CircularProgress,
@@ -6,11 +6,11 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	FormControlLabel,
 	Grid,
-	Typography,
 	MenuItem,
 	Switch,
-	FormControlLabel
+	Typography
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
@@ -98,8 +98,7 @@ const QrCodeModal: React.FC<QrCodeModalProps> = ({ isOpen, onClose, name, email 
 		}
 	};
 
-	return (
-		<Dialog
+	return (<Dialog
 			open={isOpen}
 			onClose={onClose}
 		>
@@ -127,8 +126,7 @@ const QrCodeModal: React.FC<QrCodeModalProps> = ({ isOpen, onClose, name, email 
 					{t('Download')}
 				</Button>
 			</DialogActions>
-		</Dialog>
-	);
+		</Dialog>);
 };
 
 // Props interface for the main component
@@ -141,121 +139,94 @@ interface Props {
 }
 
 const UserRegistrationModal: React.FC<Props> = ({
-	isOpen,
-	toggleModal,
-	clickedRowData,
-	fetchAllUsers,
-	isTableMode
-}) => {
+													isOpen, toggleModal, clickedRowData, fetchAllUsers, isTableMode
+												}) => {
 	const { t } = useTranslation('userRegistration');
 	const [isDataLoading, setDataLoading] = useState<boolean>(false);
 	const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
 
 	// Dropdown options
-	const educationOptions = [
-		{ value: 1, label: 'Below College' },
-		{ value: 2, label: 'College' },
-		{ value: 3, label: 'Bachelor' },
-		{ value: 4, label: 'Master' },
-		{ value: 5, label: 'Doctor' }
-	];
-	const environmentSatisfactionOptions = [
-		{ value: 1, label: 'Low' },
-		{ value: 2, label: 'Medium' },
-		{ value: 3, label: 'High' },
-		{ value: 4, label: 'Very High' }
-	];
-	const jobInvolvementOptions = [
-		{ value: 1, label: 'Low' },
-		{ value: 2, label: 'Medium' },
-		{ value: 3, label: 'High' },
-		{ value: 4, label: 'Very High' }
-	];
-	const jobSatisfactionOptions = [
-		{ value: 1, label: 'Low' },
-		{ value: 2, label: 'Medium' },
-		{ value: 3, label: 'High' },
-		{ value: 4, label: 'Very High' }
-	];
-	const performanceRatingOptions = [
-		{ value: 1, label: 'Low' },
-		{ value: 2, label: 'Good' },
-		{ value: 3, label: 'Excellent' },
-		{ value: 4, label: 'Outstanding' }
-	];
-	const relationshipSatisfactionOptions = [
-		{ value: 1, label: 'Low' },
-		{ value: 2, label: 'Medium' },
-		{ value: 3, label: 'High' },
-		{ value: 4, label: 'Very High' }
-	];
-	const workLifeBalanceOptions = [
-		{ value: 1, label: 'Bad' },
-		{ value: 2, label: 'Good' },
-		{ value: 3, label: 'Better' },
-		{ value: 4, label: 'Best' }
-	];
+	const educationOptions = [{ value: 1, label: 'Below College' }, { value: 2, label: 'College' }, {
+		value: 3,
+		label: 'Bachelor'
+	}, { value: 4, label: 'Master' }, { value: 5, label: 'Doctor' }];
+	const environmentSatisfactionOptions = [{ value: 1, label: 'Low' }, { value: 2, label: 'Medium' }, {
+		value: 3,
+		label: 'High'
+	}, { value: 4, label: 'Very High' }];
+	const jobInvolvementOptions = [{ value: 1, label: 'Low' }, { value: 2, label: 'Medium' }, {
+		value: 3,
+		label: 'High'
+	}, { value: 4, label: 'Very High' }];
+	const jobSatisfactionOptions = [{ value: 1, label: 'Low' }, { value: 2, label: 'Medium' }, {
+		value: 3,
+		label: 'High'
+	}, { value: 4, label: 'Very High' }];
+	const performanceRatingOptions = [{ value: 1, label: 'Low' }, { value: 2, label: 'Good' }, {
+		value: 3,
+		label: 'Excellent'
+	}, { value: 4, label: 'Outstanding' }];
+	const relationshipSatisfactionOptions = [{ value: 1, label: 'Low' }, { value: 2, label: 'Medium' }, {
+		value: 3,
+		label: 'High'
+	}, { value: 4, label: 'Very High' }];
+	const workLifeBalanceOptions = [{ value: 1, label: 'Bad' }, { value: 2, label: 'Good' }, {
+		value: 3,
+		label: 'Better'
+	}, { value: 4, label: 'Best' }];
 
 	// Form validation schema with improved password validation
-	const validationSchema = useMemo(
-		() =>
-			yup.object().shape({
-				employee_name: yup.string().required(t('Employee Name is required')).trim(),
-				email: yup.string().email(t('Enter a valid email')).required(t('Email is required')).trim(),
-				password: yup.string().when([], {
-					is: () => isTableMode === 'new',
-					then: (schema) =>
-						schema.required(t('Password is required')).min(8, t('Password must be at least 8 characters')),
-					otherwise: (schema) =>
-						schema.optional().min(8, t('If providing a new password, it must be at least 8 characters'))
-				}),
-				Age: yup.number().required(t('Age is required')).positive().integer(),
-				BusinessTravel: yup.string().required(t('Business Travel is required')).trim(),
-				DailyRate: yup.number().required(t('Daily Rate is required')).positive(),
-				Department: yup.string().required(t('Department is required')).trim(),
-				DistanceFromHome: yup.number().required(t('Distance From Home is required')).positive(),
-				Education: yup.number().required(t('Education is required')),
-				EducationField: yup.string().required(t('Education Field is required')).trim(),
-				EnvironmentSatisfaction: yup.number().required(t('Environment Satisfaction is required')),
-				Gender: yup.string().required(t('Gender is required')).trim(),
-				HourlyRate: yup.number().required(t('Hourly Rate is required')).positive(),
-				JobInvolvement: yup.number().required(t('Job Involvement is required')),
-				JobLevel: yup.number().required(t('Job Level is required')).positive().integer(),
-				JobRole: yup.string().required(t('Job Role is required')).trim(),
-				JobSatisfaction: yup.number().required(t('Job Satisfaction is required')),
-				MaritalStatus: yup.string().required(t('Marital Status is required')).trim(),
-				MonthlyIncome: yup.number().required(t('Monthly Income is required')).positive(),
-				MonthlyRate: yup.number().required(t('Monthly Rate is required')).positive(),
-				NumCompaniesWorked: yup.number().required(t('Number of Companies Worked is required')).min(0).integer(),
-				OverTime: yup.string().required(t('Over Time is required')).trim(),
-				PerformanceRating: yup.number().required(t('Performance Rating is required')),
-				RelationshipSatisfaction: yup.number().required(t('Relationship Satisfaction is required')),
-				StockOptionLevel: yup.number().required(t('Stock Option Level is required')).min(0).integer(),
-				TotalWorkingYears: yup.number().required(t('Total Working Years is required')).min(0).integer(),
-				TrainingTimesLastYear: yup
-					.number()
-					.required(t('Training Times Last Year is required'))
-					.min(0)
-					.integer(),
-				WorkLifeBalance: yup.number().required(t('Work Life Balance is required')),
-				YearsAtCompany: yup.number().required(t('Years At Company is required')).min(0).integer(),
-				YearsInCurrentRole: yup.number().required(t('Years In Current Role is required')).min(0).integer(),
-				YearsSinceLastPromotion: yup
-					.number()
-					.required(t('Years Since Last Promotion is required'))
-					.min(0)
-					.integer(),
-				YearsWithCurrManager: yup
-					.number()
-					.required(t('Years With Current Manager is required'))
-					.min(0)
-					.integer()
-			}),
-		[isTableMode, t]
-	);
+	const validationSchema = useMemo(() => yup.object().shape({
+		employee_name: yup.string().required(t('Employee Name is required')).trim(),
+		email: yup.string().email(t('Enter a valid email')).required(t('Email is required')).trim(),
+		password: yup.string().when([], {
+			is: () => isTableMode === 'new',
+			then: (schema) => schema.required(t('Password is required')).min(8, t('Password must be at least 8 characters')),
+			otherwise: (schema) => schema.optional().min(8, t('If providing a new password, it must be at least 8 characters'))
+		}),
+		Age: yup.number().required(t('Age is required')).positive().integer(),
+		BusinessTravel: yup.string().required(t('Business Travel is required')).trim(),
+		DailyRate: yup.number().required(t('Daily Rate is required')).positive(),
+		Department: yup.string().required(t('Department is required')).trim(),
+		DistanceFromHome: yup.number().required(t('Distance From Home is required')).positive(),
+		Education: yup.number().required(t('Education is required')),
+		EducationField: yup.string().required(t('Education Field is required')).trim(),
+		EnvironmentSatisfaction: yup.number().required(t('Environment Satisfaction is required')),
+		Gender: yup.string().required(t('Gender is required')).trim(),
+		HourlyRate: yup.number().required(t('Hourly Rate is required')).positive(),
+		JobInvolvement: yup.number().required(t('Job Involvement is required')),
+		JobLevel: yup.number().required(t('Job Level is required')).positive().integer(),
+		JobRole: yup.string().required(t('Job Role is required')).trim(),
+		JobSatisfaction: yup.number().required(t('Job Satisfaction is required')),
+		MaritalStatus: yup.string().required(t('Marital Status is required')).trim(),
+		MonthlyIncome: yup.number().required(t('Monthly Income is required')).positive(),
+		MonthlyRate: yup.number().required(t('Monthly Rate is required')).positive(),
+		NumCompaniesWorked: yup.number().required(t('Number of Companies Worked is required')).min(0).integer(),
+		OverTime: yup.string().required(t('Over Time is required')).trim(),
+		PerformanceRating: yup.number().required(t('Performance Rating is required')),
+		RelationshipSatisfaction: yup.number().required(t('Relationship Satisfaction is required')),
+		StockOptionLevel: yup.number().required(t('Stock Option Level is required')).min(0).integer(),
+		TotalWorkingYears: yup.number().required(t('Total Working Years is required')).min(0).integer(),
+		TrainingTimesLastYear: yup
+			.number()
+			.required(t('Training Times Last Year is required'))
+			.min(0)
+			.integer(),
+		WorkLifeBalance: yup.number().required(t('Work Life Balance is required')),
+		YearsAtCompany: yup.number().required(t('Years At Company is required')).min(0).integer(),
+		YearsInCurrentRole: yup.number().required(t('Years In Current Role is required')).min(0).integer(),
+		YearsSinceLastPromotion: yup
+			.number()
+			.required(t('Years Since Last Promotion is required'))
+			.min(0)
+			.integer(),
+		YearsWithCurrManager: yup
+			.number()
+			.required(t('Years With Current Manager is required'))
+			.min(0)
+			.integer()
+	}), [isTableMode, t]);
 
-	// Form submission handler
-// Form submission handler
 	const handleSubmit = async (values: UserType) => {
 		try {
 			setDataLoading(true);
@@ -266,22 +237,24 @@ const UserRegistrationModal: React.FC<Props> = ({
 			}
 
 			if (isTableMode === 'edit') {
-				console.log(values);
-				// --- FIX IS HERE ---
 				await updateUser(clickedRowData.userId, submissionData);
+				toast.success(t('User updated successfully'));
 				fetchAllUsers();
 				toggleModal();
-				toast.success(t('User updated successfully'));
 			} else {
 				await registerUser(submissionData);
+				toast.success(t('User created successfully'));
 				fetchAllUsers();
 				toggleModal();
-				toast.success(t('User created successfully'));
 			}
 		} catch (error) {
-			toast.error(t('Error while saving user'));
+			fetchAllUsers();
+			toggleModal();
+			console.error('Error caught:', error);
 		} finally {
 			setDataLoading(false);
+			fetchAllUsers();
+			toggleModal();
 		}
 	};
 
@@ -321,8 +294,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 		YearsWithCurrManager: clickedRowData?.yearsWithCurrManager || 0
 	};
 
-	return (
-		<Dialog
+	return (<Dialog
 			open={isOpen}
 			maxWidth="xl"
 			onClose={toggleModal}
@@ -344,8 +316,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 					validationSchema={validationSchema}
 					enableReinitialize
 				>
-					{({ errors, touched, values }) => (
-						<Form>
+					{({ errors, touched, values }) => (<Form>
 							{/* QR Code Modal is rendered here but controlled by its own state */}
 							<QrCodeModal
 								isOpen={isQrModalOpen}
@@ -427,8 +398,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 								</Grid>
 
 								{/* QR Code Switch - only visible in new/edit modes */}
-								{isTableMode !== 'view' && (
-									<Grid
+								{isTableMode !== 'view' && (<Grid
 										item
 										lg={12}
 										md={12}
@@ -436,24 +406,21 @@ const UserRegistrationModal: React.FC<Props> = ({
 										xs={12}
 									>
 										<FormControlLabel
-											control={
-												<Switch
-													onChange={(e) => {
-														if (e.target.checked) {
-															if (!values.employee_name || !values.email) {
-																toast.info(t('Please enter name and email first.'));
-																e.target.checked = false;
-															} else {
-																setQrModalOpen(true);
-															}
+											control={<Switch
+												onChange={(e) => {
+													if (e.target.checked) {
+														if (!values.employee_name || !values.email) {
+															toast.info(t('Please enter name and email first.'));
+															e.target.checked = false;
+														} else {
+															setQrModalOpen(true);
 														}
-													}}
-												/>
-											}
+													}
+												}}
+											/>}
 											label={t('Generate User QR Code')}
 										/>
-									</Grid>
-								)}
+									</Grid>)}
 
 								{/* Age */}
 								<Grid
@@ -590,14 +557,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										>
 											{t('Select Education')}
 										</MenuItem>
-										{educationOptions.map((option) => (
-											<MenuItem
+										{educationOptions.map((option) => (<MenuItem
 												key={option.value}
 												value={option.value}
 											>
 												{option.label}
-											</MenuItem>
-										))}
+											</MenuItem>))}
 									</Field>
 								</Grid>
 								{/* Education Field */}
@@ -639,9 +604,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 										fullWidth
 										size="small"
 										select
-										error={
-											touched.EnvironmentSatisfaction && Boolean(errors.EnvironmentSatisfaction)
-										}
+										error={touched.EnvironmentSatisfaction && Boolean(errors.EnvironmentSatisfaction)}
 										helperText={touched.EnvironmentSatisfaction && errors.EnvironmentSatisfaction}
 									>
 										<MenuItem
@@ -650,14 +613,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										>
 											{t('Select Environment Satisfaction')}
 										</MenuItem>
-										{environmentSatisfactionOptions.map((option) => (
-											<MenuItem
+										{environmentSatisfactionOptions.map((option) => (<MenuItem
 												key={option.value}
 												value={option.value}
 											>
 												{option.label}
-											</MenuItem>
-										))}
+											</MenuItem>))}
 									</Field>
 								</Grid>
 								{/* Gender */}
@@ -730,14 +691,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										>
 											{t('Select Job Involvement')}
 										</MenuItem>
-										{jobInvolvementOptions.map((option) => (
-											<MenuItem
+										{jobInvolvementOptions.map((option) => (<MenuItem
 												key={option.value}
 												value={option.value}
 											>
 												{option.label}
-											</MenuItem>
-										))}
+											</MenuItem>))}
 									</Field>
 								</Grid>
 								{/* Job Level */}
@@ -810,14 +769,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										>
 											{t('Select Job Satisfaction')}
 										</MenuItem>
-										{jobSatisfactionOptions.map((option) => (
-											<MenuItem
+										{jobSatisfactionOptions.map((option) => (<MenuItem
 												key={option.value}
 												value={option.value}
 											>
 												{option.label}
-											</MenuItem>
-										))}
+											</MenuItem>))}
 									</Field>
 								</Grid>
 								{/* Marital Status */}
@@ -955,14 +912,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										>
 											{t('Select Performance Rating')}
 										</MenuItem>
-										{performanceRatingOptions.map((option) => (
-											<MenuItem
+										{performanceRatingOptions.map((option) => (<MenuItem
 												key={option.value}
 												value={option.value}
 											>
 												{option.label}
-											</MenuItem>
-										))}
+											</MenuItem>))}
 									</Field>
 								</Grid>
 								{/* Relationship Satisfaction */}
@@ -983,9 +938,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 										fullWidth
 										size="small"
 										select
-										error={
-											touched.RelationshipSatisfaction && Boolean(errors.RelationshipSatisfaction)
-										}
+										error={touched.RelationshipSatisfaction && Boolean(errors.RelationshipSatisfaction)}
 										helperText={touched.RelationshipSatisfaction && errors.RelationshipSatisfaction}
 									>
 										<MenuItem
@@ -994,14 +947,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										>
 											{t('Select Relationship Satisfaction')}
 										</MenuItem>
-										{relationshipSatisfactionOptions.map((option) => (
-											<MenuItem
+										{relationshipSatisfactionOptions.map((option) => (<MenuItem
 												key={option.value}
 												value={option.value}
 											>
 												{option.label}
-											</MenuItem>
-										))}
+											</MenuItem>))}
 									</Field>
 								</Grid>
 								{/* Stock Option Level */}
@@ -1097,14 +1048,12 @@ const UserRegistrationModal: React.FC<Props> = ({
 										>
 											{t('Select Work Life Balance')}
 										</MenuItem>
-										{workLifeBalanceOptions.map((option) => (
-											<MenuItem
+										{workLifeBalanceOptions.map((option) => (<MenuItem
 												key={option.value}
 												value={option.value}
 											>
 												{option.label}
-											</MenuItem>
-										))}
+											</MenuItem>))}
 									</Field>
 								</Grid>
 								{/* Years At Company */}
@@ -1169,9 +1118,7 @@ const UserRegistrationModal: React.FC<Props> = ({
 										component={TextFormField}
 										fullWidth
 										size="small"
-										error={
-											touched.YearsSinceLastPromotion && Boolean(errors.YearsSinceLastPromotion)
-										}
+										error={touched.YearsSinceLastPromotion && Boolean(errors.YearsSinceLastPromotion)}
 										helperText={touched.YearsSinceLastPromotion && errors.YearsSinceLastPromotion}
 									/>
 								</Grid>
@@ -1204,22 +1151,18 @@ const UserRegistrationModal: React.FC<Props> = ({
 									lg={12}
 									className="flex justify-end gap-2"
 								>
-									{isTableMode !== 'view' && (
-										<Button
+									{isTableMode !== 'view' && (<Button
 											type="submit"
 											variant="contained"
 											disabled={isDataLoading}
 											className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-yellow-800 hover:bg-yellow-800/80"
 										>
 											{t('Save')}
-											{isDataLoading && (
-												<CircularProgress
+											{isDataLoading && (<CircularProgress
 													size={24}
 													className="ml-2"
-												/>
-											)}
-										</Button>
-									)}
+												/>)}
+										</Button>)}
 									<Button
 										variant="contained"
 										className="min-w-[100px] min-h-[36px] max-h-[36px] text-[14px] text-white font-medium py-0 rounded-[6px] bg-gray-300 hover:bg-gray-300/80"
@@ -1229,12 +1172,10 @@ const UserRegistrationModal: React.FC<Props> = ({
 									</Button>
 								</Grid>
 							</Grid>
-						</Form>
-					)}
+						</Form>)}
 				</Formik>
 			</DialogContent>
-		</Dialog>
-	);
+		</Dialog>);
 };
 
 export default UserRegistrationModal;

@@ -98,45 +98,45 @@ function VehicleManagement() {
 				width: '15%'
 			}
 		},
-		{
-			title: t('Department'),
-			field: 'department',
-			cellStyle: {
-				padding: '4px 8px',
-				width: '15%'
-			},
-			render: (rowData: VehicleResp) => {
-				const departmentColors: { [key: string]: { text: string; bg: string } } = {
-					HR: { text: '#1976D2', bg: '#E3F2FD' },
-					'Human Resources': { text: '#1976D2', bg: '#E3F2FD' },
-					Engineering: { text: '#388E3C', bg: '#E8F5E9' },
-					Sales: { text: '#F57C00', bg: '#FFF3E0' },
-					Marketing: { text: '#C2185B', bg: '#FCE4EC' }
-				};
-
-				const { text, bg } = departmentColors[rowData.department] || {
-					text: '#424242',
-					bg: '#E0E0E0'
-				};
-
-				return (
-					<span
-						style={{
-							display: 'inline-block',
-							padding: '4px 12px',
-							borderRadius: '16px',
-							color: text,
-							backgroundColor: bg,
-							fontSize: '12px',
-							fontWeight: 500,
-							textAlign: 'center'
-						}}
-					>
-						{t(rowData.department)}
-					</span>
-				);
-			}
-		},
+		// {
+		// 	title: t('Department'),
+		// 	field: 'department',
+		// 	cellStyle: {
+		// 		padding: '4px 8px',
+		// 		width: '15%'
+		// 	},
+		// 	render: (rowData: VehicleResp) => {
+		// 		const departmentColors: { [key: string]: { text: string; bg: string } } = {
+		// 			HR: { text: '#1976D2', bg: '#E3F2FD' },
+		// 			'Human Resources': { text: '#1976D2', bg: '#E3F2FD' },
+		// 			Engineering: { text: '#388E3C', bg: '#E8F5E9' },
+		// 			Sales: { text: '#F57C00', bg: '#FFF3E0' },
+		// 			Marketing: { text: '#C2185B', bg: '#FCE4EC' }
+		// 		};
+		//
+		// 		const { text, bg } = departmentColors[rowData.department] || {
+		// 			text: '#424242',
+		// 			bg: '#E0E0E0'
+		// 		};
+		//
+		// 		return (
+		// 			<span
+		// 				style={{
+		// 					display: 'inline-block',
+		// 					padding: '4px 12px',
+		// 					borderRadius: '16px',
+		// 					color: text,
+		// 					backgroundColor: bg,
+		// 					fontSize: '12px',
+		// 					fontWeight: 500,
+		// 					textAlign: 'center'
+		// 				}}
+		// 			>
+		// 				{t(rowData.department)}
+		// 			</span>
+		// 		);
+		// 	}
+		// },
 		{
 			title: t('Suggestion'),
 			field: 'suggestion',
@@ -147,7 +147,7 @@ function VehicleManagement() {
 			},
 			render: (rowData: VehicleResp) => {
 				const words = rowData.suggestion.split(' ');
-				const firstThreeWords = words.slice(0, 3).join(' ');
+				const firstThreeWords = words.slice(0, 8).join(' ');
 				return words.length > 3 ? `${firstThreeWords}...` : firstThreeWords;
 			}
 		},
