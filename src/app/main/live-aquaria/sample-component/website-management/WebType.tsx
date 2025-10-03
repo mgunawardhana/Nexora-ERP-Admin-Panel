@@ -11,7 +11,7 @@ import NewShippingTypeModel from './components/NewShippingType';
 import { ShippingTypeModifiedData, WebTypeResp } from './types/ShippingTypes';
 import ShippingTypeActiveComp from './components/ShippingTypeActiveComp';
 import ShippingTypeDeleteAlertForm from './components/ShippingTypeDeleteAlertForm';
-import { deleteWebArticle } from '../../../../axios/services/mega-city-services/web-article/WebArticleService';
+// import { deleteWebArticle } from '../../../../axios/services/mega-city-services/web-article/WebArticleService';
 
 function WebType() {
 	const { t } = useTranslation('shippingTypes');
@@ -159,7 +159,7 @@ function WebType() {
 
 		toggleDeleteModal();
 		try {
-			await deleteWebArticle(selectedDeleteRowData?.articleId);
+			// await deleteWebArticle(selectedDeleteRowData?.articleId);
 			await fetchAllShippingTypes();
 			toast.success('Article deleted successfully');
 		} catch (e) {

@@ -16,7 +16,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // --- MOCK EXTERNAL DEPENDENCIES ---
 
@@ -361,12 +360,38 @@ function BookingType() {
                 `;
 
 				const apiKey = 'AIzaSyCNmhh3khykho2S1R5GpG_vdsc9crFB4ZQ';
-				const genAI = new GoogleGenerativeAI(apiKey);
-				const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+				const modelName = 'gemini-2.0-flash'; // Updated model name from your backend reference
+				const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-				const result = await model.generateContent(promptText);
-				const response = await result.response;
-				const text = response.text();
+				const apiResponse = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						contents: [{
+							role: 'user', // Explicitly setting role as per backend reference
+							parts: [{
+								text: promptText,
+							}],
+						}],
+					}),
+				});
+
+				if (!apiResponse.ok) {
+					const errorData = await apiResponse.json().catch(() => ({}));
+					console.error('API Error:', errorData);
+					throw new Error(`API request failed with status: ${apiResponse.status}`);
+				}
+
+				const data = await apiResponse.json();
+
+				if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content?.parts[0]?.text) {
+					toast.error(t('Failed to get a valid response from AI.'));
+					return;
+				}
+
+				const text = data.candidates[0].content.parts[0].text;
 
 				if (text) {
 					const suggestionParagraph: string = text.trim();
@@ -385,7 +410,7 @@ function BookingType() {
 				setIsSearching(false);
 			}
 		},
-		[t, startWritingAnimation]
+		[t, startWritingAnimation, isSpeechEnabled, speakQueue]
 	);
 
 	const handleReset = useCallback(

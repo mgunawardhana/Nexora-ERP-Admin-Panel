@@ -12,8 +12,7 @@ import ShippingTypeActiveComp from './components/ShippingTypeActiveComp';
 import ShippingTypeDeleteAlertForm from './components/ShippingTypeDeleteAlertForm';
 import { fetchAllUsersByPagination } from '../../../../axios/services/mega-city-services/user-management-service/UserService';
 import {
-	deleteSuggestion,
-	deleteWebArticle
+	deleteSuggestion
 } from '../../../../axios/services/mega-city-services/web-article/WebArticleService';
 
 // Define the User interface based on the requested fields
