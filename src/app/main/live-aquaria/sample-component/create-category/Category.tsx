@@ -348,7 +348,9 @@ function Category(): JSX.Element {
 				const statusColors: { [key: string]: { text: string; bg: string } } = {
 					ACTIVE: { text: '#388E3C', bg: '#E8F5E9' },
 					PROBATION: { text: '#F57C00', bg: '#FFF3E0' },
-					PERMANENT: { text: '#1976D2', bg: '#E3F2FD' }
+					PERMANENT: { text: '#1976D2', bg: '#E3F2FD' },
+					ON_LEAVE: { text: '#7219d2', bg: '#e5ddf6' },
+					NOTICE_PERIOD: { text: '#D32F2F', bg: '#FBE9E7' },
 				};
 				const { text, bg } = statusColors[rowData.employmentStatus] || { text: '#424242', bg: '#E0E0E0' };
 				return (

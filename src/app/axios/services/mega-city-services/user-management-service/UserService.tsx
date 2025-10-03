@@ -7,3 +7,5 @@ export const fetchAllUsersByPagination = (page: string | number, size: string | 
 export const registerUser = (data: any) => post(url.REGISTER_USER, data);
 
 export const updateUser = (id: any, data: any) => put(`${url.UPDATE_USER}${id}`, data);
+
+export const fetchAllSuggestions = () => post(`${url.FOR_DASHBOARD_CARD}page=${0}&size=${15}`);

@@ -362,9 +362,13 @@ function BookingType() {
 						- Name: ${firstName || 'The employee'} ${lastName || ''}
 						- Code: ${employeeCode || 'N/A'}
 						- Department: ${department || 'their department'}
-						- KPI Score: 0.21
 						
-						The paragraph should provide concise, non-repetitive, and actionable feedback. Avoid repeating words or phrases. If a field is missing or generic (e.g., "undefined" or empty), use natural fallback terms. Do not include greetings or headings—only the evaluation paragraph.
+						
+						${questionsion ? `- Additional Context: ${values.question}` : ''}
+						
+						Focus on key strengths, areas for improvement, and overall contributions to the team.
+						Use a professional and constructive tone
+						.
 						`;
 
 				const script = {
@@ -446,7 +450,7 @@ function BookingType() {
 					<SearchIcon /> {t('Find Suggestions')}
 				</Typography>
 				<Formik
-					initialValues={{ firstName: '', lastName: '', department: '', employeeCode: '' }}
+					initialValues={{ firstName: '', lastName: '', department: '', employeeCode: '', question: '' }}
 					validationSchema={validationSchema}
 					onSubmit={handleSearch}
 				>
@@ -515,6 +519,21 @@ function BookingType() {
 										fullWidth
 										size="small"
 										placeholder={t('Enter employee code')}
+									/>
+								</Grid>
+								<Grid
+									item
+									xs={12}
+									sm={6}
+									md={3}
+								>
+									<FieldLabel>{t('Question')}</FieldLabel>
+									<Field
+										name="question"
+										component={TextFormField}
+										fullWidth
+										size="small"
+										placeholder={t('ask from chatbot ?')}
 									/>
 								</Grid>
 							</Grid>

@@ -36,7 +36,9 @@ export const FETCH_ORDERS = 'api/sales/orders?page';
 export const FETCH_ANALYZED_PART = 'api/v1/analytics/role-count';
 export const ROLES_BY_OFFICE_LOCATIONS_FOR_ANALYTICS = 'api/v1/analytics/role-by-office-location';
 export const STATUS_BY_ROLE_FOR_ANALYTICS = 'api/v1/analytics/role-by-employment-status';
-export const GEMINI_API_CALL = 'api/gemini/generate';
+
+export const GEMINI_API_CALL = 'api/v1/model/gemini-for/advanced/decision';
 
 export const GET_ALL_SUGGESTIONS = 'api/v1/attendance/fetch-suggestions?';
 export const FETCH_PREDICTION = 'api/v1/model/predict/';
+export const FOR_DASHBOARD_CARD = 'api/v1/auth/get-all-users?';

@@ -1,26 +1,22 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import { format } from 'date-fns';
-import { Icon } from '@mui/material';
+import { Icon, Card, CardContent, Typography, Avatar, Box, Chip } from '@mui/material';
+import {
+	fetchAllSuggestions
+} from '../../../../../axios/services/mega-city-services/user-management-service/UserService';
 
-// Define types for API response and state
-interface BusinessSummary {
-	orderCount: number;
-	totalBoatmanCost: number;
-	totalGuideCost: number;
-	totalSalesAmount: number;
-	groupCodeCount: number;
-	date: string;
-}
-
+// --- TYPES ---
 interface User {
 	id: number;
-	name: string;
+	firstName: string;
+	lastName: string;
 	email: string;
-	phone: string;
-	avatar: string;
+	contactNumber: string;
+	avatar: string; // Keep avatar for users who might have one
+	role: string;
+	status: 'Active' | 'Banned' | 'Pending';
 }
 
 interface WeatherData {
@@ -35,44 +31,98 @@ interface WeatherData {
 	name: string;
 }
 
-const mockUsers: User[] = [
-	{
-		id: 1,
-		name: 'John Doe',
-		email: 'john.doe@example.com',
-		phone: '123-456-7890',
-		avatar: 'https://i.pravatar.cc/150?img=1'
-	},
-	{
-		id: 2,
-		name: 'Jane Smith',
-		email: 'jane.smith@example.com',
-		phone: '098-765-4321',
-		avatar: 'https://i.pravatar.cc/150?img=2'
-	},
-	{
-		id: 3,
-		name: 'Sam Wilson',
-		email: 'sam.wilson@example.com',
-		phone: '555-555-5555',
-		avatar: 'https://i.pravatar.cc/150?img=3'
+// --- Helper function to generate a consistent color from a string ---
+const stringToColor = (str: string) => {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
 	}
-];
+	let color = '#';
+	for (let i = 0; i < 3; i++) {
+		const value = (hash >> (i * 8)) & 0xFF;
+		color += `00${value.toString(16)}`.slice(-2);
+	}
+	return color;
+};
 
-function StatCard({ icon, label, value, color }) {
-	return (
-		<motion.div
-			className="p-6 rounded-lg shadow-md flex items-center space-x-4 bg-white"
-			variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+
+// --- UserCard Component ---
+function UserCard({ user }: { user: User }) {
+	const getStatusChipColor = (status: string) => {
+		switch (status?.toLowerCase()) {
+			case 'active':
+				return 'success';
+			case 'banned':
+				return 'error';
+			case 'pending':
+				return 'warning';
+			default:
+				return 'default';
+		}
+	};
+
+	const avatarContent = (
+		<Avatar
+			sx={{
+				width: 80,
+				height: 80,
+				mb: 2,
+				bgcolor: stringToColor(`${user.firstName} ${user.lastName}`),
+				color: 'white',
+				fontSize: '2rem'
+			}}
 		>
-			<div className={`rounded-full p-3 ${color}`}>
-				<Icon className="text-white">{icon}</Icon>
-			</div>
-			<div>
-				<p className="text-gray-500 text-sm font-medium">{label}</p>
-				<p className="text-2xl font-bold text-gray-800">{value}</p>
-			</div>
-		</motion.div>
+			{user.firstName ? user.firstName[0].toUpperCase() : ''}
+		</Avatar>
+	);
+
+	return (
+		<Card
+			component={motion.div}
+			variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+			className="shadow-md hover:shadow-xl transition-shadow duration-300"
+		>
+			<CardContent className="flex flex-col items-center text-center p-6">
+				{avatarContent}
+				<Typography
+					variant="h6"
+					className="font-bold"
+				>
+					{`${user.firstName} ${user.lastName}`}
+				</Typography>
+				<Typography
+					color="text.secondary"
+					className="mb-2"
+				>
+					{user.role}
+				</Typography>
+
+				<Box className="flex items-center text-gray-600 my-1">
+					<Icon
+						fontSize="small"
+						className="mr-2"
+					>
+						email
+					</Icon>
+					<Typography variant="body2">{user.email}</Typography>
+				</Box>
+				<Box className="flex items-center text-gray-600 mb-4">
+					<Icon
+						fontSize="small"
+						className="mr-2"
+					>
+						phone
+					</Icon>
+					<Typography variant="body2">{user.contactNumber}</Typography>
+				</Box>
+
+				<Chip
+					label={user.status}
+					color={getStatusChipColor(user.status)}
+					size="small"
+				/>
+			</CardContent>
+		</Card>
 	);
 }
 
@@ -80,10 +130,9 @@ function StatCard({ icon, label, value, color }) {
  * The HomeTab component.
  */
 function HomeTab() {
-	const [summary, setSummary] = useState<BusinessSummary | null>(null);
 	const [weather, setWeather] = useState<WeatherData | null>(null);
 	const [dateTime, setDateTime] = useState(new Date());
-	const [users] = useState<User[]>(mockUsers);
+	const [users, setUsers] = useState<User[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	const container = {
@@ -103,7 +152,7 @@ function HomeTab() {
 		const fetchAllData = async () => {
 			setLoading(true);
 			try {
-				await Promise.all([fetchSummary(), fetchWeather()]);
+				await Promise.all([fetchUsers()]);
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 				toast.error(errorMessage);
@@ -118,41 +167,28 @@ function HomeTab() {
 		return () => clearInterval(timer);
 	}, []);
 
-	const fetchSummary = async () => {
-		// This is a placeholder. Replace with your actual API call.
-		const mockSummary: BusinessSummary = {
-			orderCount: 125,
-			totalBoatmanCost: 15000,
-			totalGuideCost: 8500,
-			totalSalesAmount: 250000,
-			groupCodeCount: 34,
-			date: new Date().toISOString()
-		};
-		setSummary(mockSummary);
-	};
-
-	const fetchWeather = async () => {
+	const fetchUsers = async () => {
 		try {
-			// ** IMPORTANT: Replace 'YOUR_API_KEY' with your actual OpenWeatherMap API key **
-			const response = await axios.get(
-				`https://api.openweathermap.org/data/2.5/weather?q=Galle&appid=YOUR_API_KEY&units=metric`
-			);
-			setWeather(response.data);
+			const response = await fetchAllSuggestions();
+			console.log(response);
+
+			if (response && response.result && Array.isArray(response.result.content)) {
+				setUsers(response.result.content);
+			}
+
 		} catch (error) {
-			console.error(
-				'Could not fetch weather data. Please replace YOUR_API_KEY with a valid one from openweathermap.org'
-			);
-			// Silently fail for weather if API key is not set
+			console.error('Failed to fetch users:', error);
+			toast.error('Could not fetch user data. Please check the console for more details.');
 		}
 	};
 
 	const formattedDate = format(dateTime, 'eeee, MMMM do, yyyy');
 	const formattedTime = format(dateTime, 'h:mm:ss a');
 
-	if (loading && !summary) {
+	if (loading) {
 		return (
-			<div className="flex justify-center items-center h-full">
-				<p>Loading Dashboard...</p>
+			<div className="flex justify-center items-center h-full p-10">
+				<Typography>Loading Dashboard...</Typography>
 			</div>
 		);
 	}
@@ -191,118 +227,25 @@ function HomeTab() {
 				</div>
 			</motion.div>
 
-			{/* <motion.div */}
-			{/*	className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8" */}
-			{/*	variants={container} */}
-			{/*	initial="hidden" */}
-			{/*	animate="show" */}
-			{/* > */}
-			{/*	<StatCard */}
-			{/*		icon="shopping_cart" */}
-			{/*		label="Total Orders" */}
-			{/*		value={summary?.orderCount ?? 'N/A'} */}
-			{/*		color="bg-blue-500" */}
-			{/*	/> */}
-			{/*	<StatCard */}
-			{/*		icon="attach_money" */}
-			{/*		label="Total Sales" */}
-			{/*		value={`$${(summary?.totalSalesAmount ?? 0).toLocaleString()}`} */}
-			{/*		color="bg-green-500" */}
-			{/*	/> */}
-			{/*	<StatCard */}
-			{/*		icon="directions_boat" */}
-			{/*		label="Boatman Costs" */}
-			{/*		value={`$${(summary?.totalBoatmanCost ?? 0).toLocaleString()}`} */}
-			{/*		color="bg-yellow-500" */}
-			{/*	/> */}
-			{/*	<StatCard */}
-			{/*		icon="person" */}
-			{/*		label="Guide Costs" */}
-			{/*		value={`$${(summary?.totalGuideCost ?? 0).toLocaleString()}`} */}
-			{/*		color="bg-purple-500" */}
-			{/*	/> */}
-			{/*	<StatCard */}
-			{/*		icon="group" */}
-			{/*		label="Group Codes" */}
-			{/*		value={summary?.groupCodeCount ?? 'N/A'} */}
-			{/*		color="bg-red-500" */}
-			{/*	/> */}
-			{/* </motion.div> */}
-
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+			{/* Users Section - Now takes full width */}
+			<motion.div
+				variants={item}
+			>
+				<h2 className="text-xl font-bold text-gray-800 mb-4">Users</h2>
 				<motion.div
-					className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md"
-					variants={item}
+					className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6"
+					variants={container}
+					initial="hidden"
+					animate="show"
 				>
-					<h2 className="text-xl font-bold text-gray-800 mb-4">Recent User Activity</h2>
-					<div className="overflow-x-auto">
-						<table className="w-full text-left">
-							<thead>
-								<tr className="border-b">
-									<th className="p-3">User</th>
-									<th className="p-3">Email</th>
-									<th className="p-3">Contact</th>
-								</tr>
-							</thead>
-							<tbody>
-								{users.map((user) => (
-									<tr
-										key={user.id}
-										className="border-b hover:bg-gray-50"
-									>
-										<td className="p-3 flex items-center">
-											<img
-												src={user.avatar}
-												alt={user.name}
-												className="w-8 h-8 rounded-full mr-3"
-											/>
-											<span className="font-medium">{user.name}</span>
-										</td>
-										<td className="p-3 text-gray-600">{user.email}</td>
-										<td className="p-3 text-gray-600">{user.phone}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
+					{users.map((user) => (
+						<UserCard
+							key={user.id}
+							user={user}
+						/>
+					))}
 				</motion.div>
-
-				<motion.div
-					className="bg-white p-6 rounded-lg shadow-md"
-					variants={item}
-				>
-					<h2 className="text-xl font-bold text-gray-800 mb-4">Notifications</h2>
-					<ul>
-						<li className="flex items-start mb-4">
-							<div className="bg-blue-100 text-blue-600 p-2 rounded-full mr-3">
-								<Icon>info</Icon>
-							</div>
-							<div>
-								<p className="font-semibold">New System Update</p>
-								<p className="text-sm text-gray-500">Version 2.5.1 is now available.</p>
-							</div>
-						</li>
-						<li className="flex items-start mb-4">
-							<div className="bg-yellow-100 text-yellow-600 p-2 rounded-full mr-3">
-								<Icon>warning</Icon>
-							</div>
-							<div>
-								<p className="font-semibold">Server Maintenance</p>
-								<p className="text-sm text-gray-500">Scheduled for tonight at 11:00 PM.</p>
-							</div>
-						</li>
-						<li className="flex items-start">
-							<div className="bg-green-100 text-green-600 p-2 rounded-full mr-3">
-								<Icon>check_circle</Icon>
-							</div>
-							<div>
-								<p className="font-semibold">Backups Completed</p>
-								<p className="text-sm text-gray-500">All databases were successfully backed up.</p>
-							</div>
-						</li>
-					</ul>
-				</motion.div>
-			</div>
+			</motion.div>
 		</div>
 	);
 }
