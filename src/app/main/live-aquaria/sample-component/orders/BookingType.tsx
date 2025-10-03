@@ -16,7 +16,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
-import { geminiAPICall } from '../../../../axios/services/mega-city-services/common/CommonService';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // --- MOCK EXTERNAL DEPENDENCIES ---
 
@@ -190,6 +190,7 @@ interface SearchFormValues {
 	lastName: string;
 	department: string;
 	employeeCode: string;
+	question: string;
 }
 
 // --- MAIN COMPONENT ---
@@ -204,14 +205,12 @@ function BookingType() {
 	const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 	const [isSpeechEnabled, setIsSpeechEnabled] = useState<boolean>(false);
 
-	// Add refs to track animation state and prevent duplicates
 	const animationRef = useRef<NodeJS.Timeout | null>(null);
 	const isAnimatingRef = useRef<boolean>(false);
 
 	useEffect(() => {
 		const loadVoices = () => {
 			const availableVoices: SpeechSynthesisVoice[] = window.speechSynthesis.getVoices();
-
 			if (availableVoices.length > 0) {
 				setSpeechVoices(availableVoices);
 			}
@@ -234,7 +233,6 @@ function BookingType() {
 				];
 				for (const name of preferredVoices) {
 					const voice = speechVoices.find((v: SpeechSynthesisVoice) => v.name === name);
-
 					if (voice) return voice;
 				}
 				const femaleVoice = speechVoices.find(
@@ -280,34 +278,30 @@ function BookingType() {
 		[speak]
 	);
 
-	// Fixed animation function that prevents duplicates
 	const startWritingAnimation = useCallback(
 		(fullParagraph: string) => {
-			// Clear any existing animation
 			if (animationRef.current) {
 				clearInterval(animationRef.current);
 			}
 
-			// Prevent multiple animations from running
 			if (isAnimatingRef.current) {
 				return;
 			}
 
 			isAnimatingRef.current = true;
-			setAnimatedSuggestion(''); // Reset to empty string
+			setAnimatedSuggestion('');
 
-			const words = fullParagraph.split(' ').filter((word) => word.trim() !== ''); // Filter out empty words
+			const words = fullParagraph.split(' ').filter((word) => word.trim() !== '');
 			let currentText = '';
 			let index = 0;
 
 			animationRef.current = setInterval(() => {
 				if (index < words.length) {
-					// Build the text progressively instead of using previous state
 					currentText += (index > 0 ? ' ' : '') + words[index];
 					setAnimatedSuggestion(currentText);
 					index++;
 				} else {
-					clearInterval(animationRef.current);
+					clearInterval(animationRef.current!);
 					animationRef.current = null;
 					isAnimatingRef.current = false;
 
@@ -321,13 +315,11 @@ function BookingType() {
 		[speakQueue, isSpeechEnabled]
 	);
 
-	// Cleanup effect
 	useEffect(() => {
 		return () => {
 			if (animationRef.current) {
 				clearInterval(animationRef.current);
 			}
-
 			isAnimatingRef.current = false;
 		};
 	}, []);
@@ -336,17 +328,16 @@ function BookingType() {
 		firstName: yup.string(),
 		lastName: yup.string(),
 		department: yup.string(),
-		employeeCode: yup.string()
+		employeeCode: yup.string(),
+		question: yup.string()
 	});
 
 	const handleSearch = useCallback(
 		async (values: SearchFormValues) => {
-			// Clear any existing animation before starting new search
 			if (animationRef.current) {
 				clearInterval(animationRef.current);
 				animationRef.current = null;
 			}
-
 			isAnimatingRef.current = false;
 
 			setIsSearching(true);
@@ -355,34 +346,32 @@ function BookingType() {
 			setHasSearched(true);
 
 			try {
-				const { firstName, lastName, department, employeeCode } = values;
+				const { firstName, lastName, department, employeeCode, question } = values;
 				const promptText = `
-						Generate a single performance evaluation paragraph (3–4 lines) based on the following employee details:
-						
-						- Name: ${firstName || 'The employee'} ${lastName || ''}
-						- Code: ${employeeCode || 'N/A'}
-						- Department: ${department || 'their department'}
-						
-						
-						${questionsion ? `- Additional Context: ${values.question}` : ''}
-						
-						Focus on key strengths, areas for improvement, and overall contributions to the team.
-						Use a professional and constructive tone
-						.
-						`;
+                    Generate a single performance evaluation paragraph (3–4 lines) based on the following employee details:
+                    
+                    - Name: ${firstName || 'The employee'} ${lastName || ''}
+                    - Code: ${employeeCode || 'N/A'}
+                    - Department: ${department || 'their department'}
+                    
+                    ${question ? `- Additional Context: ${question}` : ''}
+                    
+                    Focus on key strengths, areas for improvement, and overall contributions to the team.
+                    Use a professional and constructive tone.
+                `;
 
-				const script = {
-					prompt: promptText,
-					options: { temperature: 0.7, maxOutputTokens: 250 }
-				};
-				const response = await geminiAPICall(script);
+				const apiKey = 'AIzaSyCNmhh3khykho2S1R5GpG_vdsc9crFB4ZQ';
+				const genAI = new GoogleGenerativeAI(apiKey);
+				const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-				if (response.success && response.content) {
-					const suggestionParagraph: string = response.content.trim();
+				const result = await model.generateContent(promptText);
+				const response = await result.response;
+				const text = response.text();
+
+				if (text) {
+					const suggestionParagraph: string = text.trim();
 					setSuggestion(suggestionParagraph);
 					toast.success(t('Suggestions generated!'));
-
-					// Small delay to ensure state is updated before animation starts
 					setTimeout(() => {
 						startWritingAnimation(suggestionParagraph);
 					}, 100);
@@ -401,7 +390,6 @@ function BookingType() {
 
 	const handleReset = useCallback(
 		(resetForm: () => void) => {
-			// Clear animation
 			if (animationRef.current) {
 				clearInterval(animationRef.current);
 				animationRef.current = null;
@@ -641,3 +629,4 @@ function BookingType() {
 }
 
 export default BookingType;
+
